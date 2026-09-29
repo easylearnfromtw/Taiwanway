@@ -1,0 +1,73 @@
+
+/* ============================================================
+   全畫面置中修正
+   - 只統一「畫面 / 容器」水平置中，不強迫所有文字改為置中。
+   - 保留原本桌機、手機、卡片、grid 與閱讀版面的內部對齊。
+   ============================================================ */
+html,body{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#app{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#app>.view{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#app>.view.wrap,
+#app>.view>.wrap,
+#app>.view>section.wrap,
+.wrap{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+/* constrained page views keep the same site measure and stay centered */
+#app>.view.wrap{
+  max-width:1200px!important;
+}
+/* first-visit / overlay screens */
+#welcome .wl-stage{
+  justify-items:center!important;
+}
+#welcome .wl-step,
+#welcome .wl-loader,
+.sh-panel,
+.cng-card,
+.csm-card,
+.cafx-stage{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#welcome .wl-step{
+  justify-self:center!important;
+}
+/* defensive mobile centering without reintroducing horizontal scrolling */
+@media(max-width:820px){
+  #app,
+  #app>.view,
+  #app>.view.wrap,
+  #app>.view>.wrap,
+  #app>.view>section.wrap,
+  .wrap{
+    width:100%!important;
+    max-width:100%!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+  #welcome .wl-step,
+  #welcome .wl-loader,
+  .sh-panel,
+  .cng-card,
+  .csm-card,
+  .cafx-stage{
+    justify-self:center!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+}

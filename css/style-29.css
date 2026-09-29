@@ -1,0 +1,112 @@
+
+/* Shared viewport + input ergonomics */
+html,body{min-height:100%;min-height:100dvh}
+body{overscroll-behavior-x:none}
+img,svg,canvas,video{max-width:100%}
+input,textarea,select{font-size:max(16px,1em)}
+@media(pointer:coarse){button,.btn,.icon-btn,[role="button"],summary{min-height:44px}.gs-row>button{min-height:42px}}
+
+/* Desktop: use the canvas instead of leaving the experience phone-sized */
+@media (min-width:1180px) and (pointer:fine){
+  body{padding-inline:clamp(20px,3vw,44px)!important}
+  .wrap,#app>.view.wrap{max-width:1280px!important}
+  .nav{max-width:1320px;height:66px;padding-inline:18px}
+  .nav-links .gs-row>button{padding-inline:15px}
+  .view{padding-top:34px}
+  .sec{margin-top:82px}
+  .sec-head{margin-bottom:24px}
+  .card,.panel{box-shadow:0 1px 2px rgba(32,35,33,.05),0 16px 44px -30px rgba(32,35,33,.22)}
+  .article{column-gap:34px}
+  .art-tools{top:96px}
+  .to-top{right:max(24px,calc((100vw - 1380px)/2))}
+}
+
+/* Laptop: preserve desktop navigation but reduce crowding */
+@media (min-width:921px) and (max-width:1179px){
+  body{padding-inline:20px!important}
+  .wrap,#app>.view.wrap{max-width:1060px!important}
+  .nav{margin-inline:auto}
+  .nav-links .gs-row>button{padding-inline:9px}
+}
+
+/* Tablet / iPad portrait + landscape: two-dimensional layout, larger touch targets */
+@media (min-width:700px) and (max-width:1024px) and (pointer:coarse){
+  body{padding-left:max(20px,env(safe-area-inset-left,0px))!important;padding-right:max(20px,env(safe-area-inset-right,0px))!important}
+  .wrap,#app>.view.wrap{max-width:920px!important}
+  .view{padding-top:24px;padding-bottom:118px}
+  .nav{width:calc(100% - 8px);margin-top:12px}
+  .tabbar{width:min(620px,calc(100% - 40px));border-radius:28px}
+  .tabbar .gs-row>button{min-height:58px}
+  .tabbar .tl{font-size:11px}
+  .sec{margin-top:62px}
+  .sec-head{gap:14px}
+  .card,.panel{border-radius:24px}
+  .pop{width:min(420px,calc(100vw - 48px));right:max(24px,env(safe-area-inset-right,0px))}
+  .s-panel{width:min(760px,100%);max-height:calc(100dvh - 120px)}
+  .sound-sheet{width:min(620px,calc(100% - 40px))}
+  .ac-dragon-guide,.ac-battle-stack,.ac-req-head{max-width:860px!important}
+}
+
+/* Tablet landscape has enough width for the desktop nav; avoid phone-like bottom nav. */
+@media (min-width:900px) and (max-width:1366px) and (pointer:coarse) and (orientation:landscape){
+  .nav-links{display:block!important}
+  .nav-search{display:flex!important}
+  .nav-search span,.nav-search kbd{display:none}
+  .nav-search{width:42px;padding:0;justify-content:center}
+  .m-only{display:none!important}
+  .tabbar{display:none!important}
+  body{padding-bottom:max(72px,env(safe-area-inset-bottom,0px))!important}
+  .view{padding-bottom:54px!important}
+  .toasts{bottom:calc(env(safe-area-inset-bottom,0px) + 28px)!important}
+  .to-top{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)!important}
+}
+
+/* iPhone / modern notched phones, including Dynamic Island safe areas */
+@media (max-width:699px){
+  body{padding-top:0;padding-left:max(10px,env(safe-area-inset-left,0px))!important;padding-right:max(10px,env(safe-area-inset-right,0px))!important;padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
+  .nav{top:calc(env(safe-area-inset-top,0px) + 7px);width:100%;margin-top:7px;height:54px;border-radius:18px}
+  .view{padding-top:22px;padding-bottom:calc(122px + env(safe-area-inset-bottom,0px))}
+  .tabbar{bottom:calc(env(safe-area-inset-bottom,0px) + 8px);width:calc(100% - max(20px,env(safe-area-inset-left,0px) + env(safe-area-inset-right,0px)));max-width:500px}
+  .tabbar .gs-row>button{min-height:56px;padding-top:7px;padding-bottom:7px}
+  .pop{top:calc(env(safe-area-inset-top,0px) + 70px);right:max(10px,env(safe-area-inset-right,0px));width:calc(100vw - max(20px,env(safe-area-inset-left,0px) + env(safe-area-inset-right,0px)))}
+  .ov{padding-top:calc(env(safe-area-inset-top,0px) + 66px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
+  .s-panel{max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 92px)}
+  .sound-sheet{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
+  .toasts{bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}
+  .to-top{bottom:calc(env(safe-area-inset-bottom,0px) + 90px)}
+  .sec{margin-top:52px}
+  .h1{font-size:clamp(32px,10.2vw,46px)}
+  .h2{font-size:clamp(24px,7vw,31px)}
+  .lede{font-size:16px}
+  .card,.panel{max-width:100%;overflow-wrap:anywhere}
+}
+
+/* Narrow iPhones: preserve content width without shrinking controls/text */
+@media (max-width:390px){
+  body{padding-left:max(8px,env(safe-area-inset-left,0px))!important;padding-right:max(8px,env(safe-area-inset-right,0px))!important}
+  .logo{gap:7px}.seal{width:32px;height:32px}.logo-t b{font-size:17px}.logo-t small{font-size:9px}
+  .nav-right .icon-btn{width:36px;min-width:36px;height:40px}
+  .tabbar{width:calc(100% - 14px)}
+  .tabbar .ti{font-size:18px}.tabbar .tl{font-size:10px}
+  .btn{padding-inline:15px}
+}
+
+/* Landscape iPhone: Dynamic Island / notch sits on the side, keep controls clear. */
+@media (max-height:520px) and (orientation:landscape) and (pointer:coarse){
+  body{padding-left:max(18px,env(safe-area-inset-left,0px))!important;padding-right:max(18px,env(safe-area-inset-right,0px))!important;padding-bottom:74px!important}
+  .nav{position:sticky;top:6px;margin-top:6px;height:48px}
+  .logo-t small{display:none}
+  .view{padding-top:14px;padding-bottom:72px}
+  .tabbar{bottom:6px;width:min(560px,calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 24px));padding:3px}
+  .tabbar .gs-row>button{min-height:46px;padding:4px 3px}.tabbar .tl{display:none}
+  .ov{padding-top:max(58px,env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .s-panel{max-height:calc(100dvh - 70px)}
+  .sound-sheet{bottom:64px}
+  .toasts,.to-top{bottom:66px}
+}
+
+/* Keyboard / accessibility: don't animate hover-only affordances on touch hardware. */
+@media (hover:none){
+  .btn:hover,.icon-btn:hover,.card:hover{transform:none}
+  .glass{-webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%)}
+}

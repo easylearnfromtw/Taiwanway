@@ -1,0 +1,62 @@
+
+/* Canva-guided dragon VFX: editorial marker texture, restrained palette, mobile-safe */
+#ac-battle{position:relative}
+.ac-dragon-stage,.ac-enemy-zone,.ac-player-zone{position:relative;isolation:isolate}
+.ac-dragon.battle-boss{position:relative;z-index:4;filter:drop-shadow(0 12px 18px rgba(33,42,58,.16));transform-origin:50% 72%}
+.ac-dragon.battle-boss::before,.ac-dragon.battle-boss::after{content:"";position:absolute;pointer-events:none;z-index:-1;left:50%;top:50%;translate:-50% -50%;border-radius:50%;opacity:0}
+.ac-dragon.battle-boss.mode-angry::before{width:142%;aspect-ratio:1;background:radial-gradient(circle,rgba(255,157,117,.30) 0 26%,rgba(201,74,67,.14) 42%,transparent 69%);opacity:1;animation:dvAura 1.35s ease-in-out infinite}
+.ac-dragon.battle-boss.mode-rage::before{width:158%;aspect-ratio:1;background:radial-gradient(circle,rgba(255,189,98,.28),rgba(201,74,67,.25) 35%,transparent 67%);opacity:1;animation:dvRage .82s ease-in-out infinite alternate}
+.ac-dragon.battle-boss.mode-rage::after{width:128%;aspect-ratio:1;border:3px solid rgba(145,199,225,.58);box-shadow:0 0 0 7px rgba(185,218,235,.14),0 0 34px rgba(103,170,203,.28),inset 0 0 28px rgba(185,218,235,.19);opacity:1;animation:dvShield 1.75s cubic-bezier(.25,.65,.35,1) infinite}
+.ac-dragon.battle-boss.mode-cry::before{width:138%;aspect-ratio:1;background:radial-gradient(circle,rgba(163,220,218,.24),rgba(197,219,239,.13) 42%,transparent 70%);opacity:1;animation:dvAura 1.8s ease-in-out infinite}
+.ac-dragon.battle-boss.mode-cry::after{width:7px;height:16px;border-radius:70% 35% 70% 35%;background:#9dd9e8;opacity:.78;box-shadow:-34px 14px 0 #b7e6ef,31px 22px 0 #8ccfdf,-18px 42px 0 #c5eef4,44px 49px 0 #a6dce8;animation:dvTears 1.15s linear infinite}
+.ac-dragon.battle-boss.hurt{animation:dvHit .34s cubic-bezier(.2,.8,.2,1)!important;filter:drop-shadow(0 9px 16px rgba(33,42,58,.16)) brightness(1.12)}
+.ac-dragon.battle-boss.shield-hit{animation:dvShieldHit .44s cubic-bezier(.2,.8,.2,1)!important}
+
+.ac-vfx{position:absolute;z-index:18;left:0;top:0;width:0;height:0;pointer-events:none;transform:translate(var(--vx),var(--vy))}
+.ac-vfx::before,.ac-vfx::after{content:"";position:absolute;left:0;top:0;translate:-50% -50%;border-radius:50%}
+.ac-vfx i{position:absolute;left:0;top:0;width:5px;height:30px;border-radius:999px;background:linear-gradient(#fff7c8,#f1c955 68%,transparent);transform-origin:50% 0;opacity:0}
+.ac-vfx i:nth-child(1){rotate:0deg}.ac-vfx i:nth-child(2){rotate:45deg}.ac-vfx i:nth-child(3){rotate:90deg}.ac-vfx i:nth-child(4){rotate:135deg}.ac-vfx i:nth-child(5){rotate:180deg}.ac-vfx i:nth-child(6){rotate:225deg}.ac-vfx i:nth-child(7){rotate:270deg}.ac-vfx i:nth-child(8){rotate:315deg}
+.ac-vfx-hit::before{width:28px;height:28px;background:#fff4b9;box-shadow:0 0 0 8px rgba(255,224,117,.27),0 0 32px rgba(238,159,90,.45);animation:dvBurstCore .58s ease-out both}
+.ac-vfx-hit::after{width:78px;height:78px;border:3px solid rgba(235,153,91,.68);animation:dvRing .7s ease-out both}
+.ac-vfx-hit i{animation:dvRay .58s ease-out both}
+.ac-vfx-shield::before,.ac-vfx-guard::before{width:76px;height:76px;border:4px solid rgba(153,215,230,.82);box-shadow:0 0 0 10px rgba(171,221,233,.17),0 0 40px rgba(120,190,211,.35);animation:dvGuard .72s ease-out both}
+.ac-vfx-shield::after,.ac-vfx-guard::after{width:112px;height:112px;border:2px dashed rgba(229,248,250,.78);animation:dvGuardOuter .9s ease-out both}
+.ac-vfx-enemy-hit::before{width:34px;height:34px;background:rgba(232,91,78,.42);box-shadow:0 0 0 8px rgba(232,91,78,.12);animation:dvBurstCore .62s ease-out both}
+.ac-vfx-enemy-hit::after{width:88px;height:88px;border:3px solid rgba(232,91,78,.52);animation:dvRing .72s ease-out both}
+.ac-vfx-heal::before{width:38px;height:38px;background:rgba(112,216,196,.38);box-shadow:0 0 0 10px rgba(112,216,196,.12),0 0 36px rgba(112,216,196,.35);animation:dvHeal .9s ease-out both}
+.ac-vfx-heal::after{content:"＋";width:auto;height:auto;border-radius:0;background:none;color:#77d7c4;font:900 42px/1 var(--f-ui);animation:dvPlus .82s var(--spring) both}
+.ac-vfx-phase-angry::before,.ac-vfx-phase-rage::before{width:150px;height:150px;background:radial-gradient(circle,rgba(255,190,106,.34),rgba(208,71,66,.25) 38%,transparent 70%);animation:dvPhasePulse 1.18s ease-out both}
+.ac-vfx-phase-rage::after{width:188px;height:188px;border:4px solid rgba(208,71,66,.48);box-shadow:0 0 0 10px rgba(255,188,103,.10);animation:dvRing 1.15s ease-out both}
+.ac-vfx-phase-cry::before{width:156px;height:156px;background:radial-gradient(circle,rgba(157,217,232,.30),rgba(185,218,238,.12) 48%,transparent 71%);animation:dvPhasePulse 1.2s ease-out both}
+
+.ac-battle-victory .ac-result{position:relative;overflow:hidden;animation:dvVictoryIn .7s var(--spring) both}
+.ac-battle-victory .ac-result::before{content:"";position:absolute;inset:-35%;z-index:-1;background:conic-gradient(from 12deg,transparent 0 8%,rgba(243,191,83,.16) 8% 11%,transparent 11% 20%,rgba(112,216,196,.12) 20% 23%,transparent 23% 34%);animation:dvVictorySpin 18s linear infinite}
+.ac-title-award.new{box-shadow:0 0 0 1px rgba(243,191,83,.24),0 22px 55px -36px rgba(243,191,83,.72),var(--shadow-1)!important}
+
+@keyframes dvAura{50%{scale:1.08;opacity:.72}}
+@keyframes dvRage{to{scale:1.13;filter:saturate(1.2)}}
+@keyframes dvShield{0%{scale:.92;opacity:.5}50%{scale:1.04;opacity:1}100%{scale:.92;opacity:.55}}
+@keyframes dvTears{0%{translate:-50% -62%;opacity:0}20%{opacity:.8}100%{translate:-50% 90%;opacity:0}}
+@keyframes dvHit{0%{transform:translateX(0) scale(1)}28%{transform:translateX(-10px) rotate(-3deg) scale(.97)}58%{transform:translateX(7px) rotate(2deg) scale(1.025)}100%{transform:none}}
+@keyframes dvShieldHit{0%{scale:1}45%{scale:.94;filter:brightness(1.22)}100%{scale:1}}
+@keyframes dvBurstCore{0%{scale:.3;opacity:0}32%{scale:1.35;opacity:1}100%{scale:2.25;opacity:0}}
+@keyframes dvRing{0%{scale:.25;opacity:.9}100%{scale:1.75;opacity:0}}
+@keyframes dvRay{0%{translate:-50% 0;scale:.2 .1;opacity:0}24%{opacity:1}100%{translate:-50% -64px;scale:.7 1.4;opacity:0}}
+@keyframes dvGuard{0%{scale:.3;opacity:0}35%{scale:1.1;opacity:1}100%{scale:1.42;opacity:0}}
+@keyframes dvGuardOuter{0%{scale:.55;rotate:0;opacity:.8}100%{scale:1.3;rotate:42deg;opacity:0}}
+@keyframes dvHeal{0%{scale:.4;opacity:0}30%{scale:1;opacity:1}100%{scale:1.9;opacity:0}}
+@keyframes dvPlus{0%{translate:-50% 10px;scale:.65;opacity:0}45%{translate:-50% -22px;scale:1.1;opacity:1}100%{translate:-50% -55px;scale:.9;opacity:0}}
+@keyframes dvPhasePulse{0%{scale:.45;opacity:0}35%{scale:1.1;opacity:1}100%{scale:1.65;opacity:0}}
+@keyframes dvVictoryIn{0%{opacity:0;translate:0 18px;scale:.975}100%{opacity:1;translate:0 0;scale:1}}
+@keyframes dvVictorySpin{to{rotate:360deg}}
+
+@media(max-width:620px){
+  .ac-dragon.battle-boss.mode-angry::before{width:135%}
+  .ac-dragon.battle-boss.mode-rage::before{width:148%}
+  .ac-vfx-phase-angry::before,.ac-vfx-phase-rage::before,.ac-vfx-phase-cry::before{width:126px;height:126px}
+  .ac-vfx-phase-rage::after{width:156px;height:156px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ac-dragon.battle-boss::before,.ac-dragon.battle-boss::after,.ac-vfx,.ac-battle-victory .ac-result::before{animation:none!important}
+  .ac-vfx{display:none!important}
+}

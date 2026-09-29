@@ -1,0 +1,92 @@
+
+/* Mobile About/Home card — force the teaser back to a real single-column layout.
+   This must stay after the product-polish overrides so desktop rules cannot squeeze it. */
+@media (max-width:820px){
+  .about-home{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:22px!important;
+    align-items:start!important;
+  }
+  .about-home>div:first-child{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .about-home .eyebrow+.tri-mini{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:3px!important;
+    width:100%!important;
+    margin-top:7px!important;
+  }
+  .about-home .eyebrow+.tri-mini .tr{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:2px 12px!important;
+    min-width:0!important;
+  }
+  .about-home .eyebrow+.tri-mini>*+*::before,
+  .about-home .eyebrow+.tri-mini .tr>*+*::before{
+    content:none!important;
+  }
+  .about-home .tri-mini .tz,
+  .about-home .tri-mini .py,
+  .about-home .tri-mini .zy,
+  .about-home .tri-mini .te,
+  .about-home .h2,
+  .about-home .phr,
+  .about-home .phr .zh,
+  .about-home .phr .py,
+  .about-home .phr .zy,
+  .about-home .phr .en{
+    min-width:0!important;
+    width:auto!important;
+    max-width:100%!important;
+    word-break:normal!important;
+    overflow-wrap:break-word!important;
+  }
+  .about-home .h2{
+    font-size:clamp(29px,9vw,42px)!important;
+    line-height:1.06!important;
+    max-width:12ch!important;
+    text-wrap:balance!important;
+  }
+  .about-home .phr .zh{line-height:1.45!important;}
+  .about-home .phr .py,
+  .about-home .phr .zy,
+  .about-home .phr .en{line-height:1.5!important;}
+  .about-home-people{
+    width:100%!important;
+    min-width:0!important;
+    justify-content:flex-start!important;
+    flex-wrap:wrap!important;
+    padding-top:2px!important;
+  }
+  .about-home-people i{
+    width:46px!important;
+    height:46px!important;
+    border-radius:15px!important;
+    font-size:16px!important;
+    margin-left:-7px!important;
+  }
+  .about-home-people i:first-child{margin-left:0!important;}
+}
+@media (max-width:520px){
+  .about-home{
+    padding:24px 22px 26px!important;
+    gap:20px!important;
+  }
+  .about-home .h2{
+    font-size:clamp(30px,10vw,38px)!important;
+    max-width:13ch!important;
+  }
+  .about-home .tri-mini .tz{font-size:18px!important;line-height:1.3!important;}
+  .about-home .tri-mini .py{font-size:13px!important;}
+  .about-home .tri-mini .zy{font-size:12.5px!important;}
+  .about-home .tri-mini .te{font-size:13px!important;}
+  .about-home .phr.sm .zh{font-size:18px!important;}
+  .about-home .phr.sm .py{font-size:14px!important;}
+  .about-home .phr.sm .zy{font-size:13px!important;}
+  .about-home .phr.sm .en{font-size:14px!important;}
+  .about-home .btn{width:max-content;max-width:100%!important;}
+}

@@ -1,0 +1,82 @@
+
+/* ===== Tablet / laptop / desktop layout refinement (phones untouched) ===== */
+@media (min-width:761px){
+  html{scroll-padding-top:96px}
+  body{padding-inline:clamp(22px,3vw,48px);padding-bottom:96px}
+  .wrap{width:100%;max-width:1440px;margin-inline:auto}
+  .view{padding-top:clamp(28px,3vw,48px)}
+  .sec{margin-top:clamp(56px,6vw,88px)}
+  .sec-head{gap:24px;margin-bottom:clamp(22px,2.5vw,34px)}
+  .lede{max-width:68ch}
+
+  /* navigation: more breathing room, less cramped on iPad/laptop */
+  .nav{width:min(1480px,calc(100% - 24px));max-width:none;height:64px;margin-top:12px;padding-inline:16px 12px;gap:16px}
+  .nav-links .gs-row{justify-content:center}
+  .nav-links .gs-row>button{min-height:42px;padding-inline:clamp(10px,1.25vw,17px)}
+  .nav-right{gap:6px}
+  .icon-btn{width:42px;height:42px}
+
+  /* general content grids: prevent giant cards and awkward sparse rows */
+  .grid{align-items:stretch}
+  .card{height:100%}
+  .btn{min-height:44px}
+  input,select,textarea{max-width:100%}
+
+  /* overlays / sheets become centered desktop dialogs rather than phone-like full sheets */
+  .ov{padding:clamp(28px,5vh,64px) clamp(24px,4vw,56px)}
+  .s-panel{width:min(920px,92vw);max-height:min(860px,88dvh);margin:auto;border-radius:28px}
+  .pop{width:min(390px,calc(100vw - 48px))}
+
+  /* tables and horizontally dense content stay inside the viewport */
+  table{max-width:100%}
+  pre,code{overflow-wrap:anywhere}
+  img,svg,canvas,video{max-width:100%}
+}
+
+/* iPad / tablet / compact laptop */
+@media (min-width:761px) and (max-width:1180px){
+  body{padding-inline:clamp(20px,3vw,32px)}
+  .wrap{max-width:1080px}
+  .nav{width:calc(100% - 20px);gap:10px}
+  .logo-t small{display:none}
+  .nav-search{display:none}
+  .nav-links .gs-row>button{font-size:13px;padding-inline:9px}
+  .h1{font-size:clamp(38px,5.2vw,56px)}
+  .h2{font-size:clamp(27px,3.4vw,34px)}
+  .sec{margin-top:60px}
+  .sec-head{align-items:flex-start}
+}
+
+/* desktop / large laptop */
+@media (min-width:1181px){
+  body{padding-inline:clamp(32px,4vw,64px)}
+  .wrap{max-width:1380px}
+  .nav{width:min(1480px,calc(100% - 32px));height:66px;border-radius:24px}
+  .logo{gap:12px}
+  .logo-t b{font-size:20px}
+  .nav-search{min-width:clamp(40px,12vw,190px)}
+  .view{padding-top:42px}
+  .sec{margin-top:78px}
+  .sec-head{margin-bottom:28px}
+  .h1{font-size:clamp(46px,4.3vw,68px)}
+  .h2{font-size:clamp(28px,2.6vw,38px)}
+  .lede{font-size:17.5px;line-height:1.65}
+}
+
+/* very wide monitors: cap readable width instead of stretching UI edge-to-edge */
+@media (min-width:1600px){
+  .wrap{max-width:1480px}
+  .nav{max-width:1540px}
+  body{padding-inline:64px}
+}
+
+/* mouse/trackpad affordances only */
+@media (min-width:761px) and (hover:hover) and (pointer:fine){
+  .btn,.icon-btn,.card{transition-duration:.22s}
+  .btn:hover{transform:translateY(-1px)}
+  .icon-btn:hover{transform:translateY(-1px)}
+}
+
+/* GitHub Pages hard boot fail-safe: works even if JavaScript initialization fails. */
+#boot-screen{animation:xtwBootHardExit .45s ease 3.2s forwards!important}
+@keyframes xtwBootHardExit{to{opacity:0;visibility:hidden;pointer-events:none}}

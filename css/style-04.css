@@ -1,0 +1,31 @@
+
+/* Final reading-mode authority: the selected mode must actually change every reading layer. */
+html.rom-p .phr .zy,
+html.rom-p .tri-mini .zy,
+html.rom-p .tri-standard .zy,
+html.rom-p .team-reading .zy,
+html.rom-p .tri-inline>.y,
+html.rom-p .wl-card .zy{display:none!important}
+html.rom-p .phr .py,
+html.rom-p .tri-mini .py,
+html.rom-p .tri-standard .py,
+html.rom-p .team-reading .py,
+html.rom-p .tri-inline>.p,
+html.rom-p .wl-card .py{display:block!important}
+html.rom-z .phr .py,
+html.rom-z .tri-mini .py,
+html.rom-z .tri-standard .py,
+html.rom-z .team-reading .py,
+html.rom-z .tri-inline>.p,
+html.rom-z .wl-card .py{display:none!important}
+html.rom-z .phr .zy,
+html.rom-z .tri-mini .zy,
+html.rom-z .tri-standard .zy,
+html.rom-z .team-reading .zy,
+html.rom-z .tri-inline>.y,
+html.rom-z .wl-card .zy{display:block!important}
+html.rom-b .phr .py,html.rom-b .phr .zy,
+html.rom-b .tri-mini .py,html.rom-b .tri-mini .zy,
+html.rom-b .tri-standard .py,html.rom-b .tri-standard .zy,
+html.rom-b .team-reading .py,html.rom-b .team-reading .zy,
+html.rom-b .wl-card .py,html.rom-b .wl-card .zy{display:block!important}

@@ -1,0 +1,169 @@
+
+/* Supplied pastel dragon integration: expression crossfade + breathing + blinking */
+.ac-dragon.pastel-dragon-mounted,
+.di-beast.pastel-dragon-mounted{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  overflow:visible!important;
+}
+.ac-dragon.pastel-dragon-mounted{
+  display:block!important;
+  animation:none!important;
+}
+.ac-dragon.pastel-dragon-mounted:not(.battle-boss){
+  width:clamp(210px,31vw,300px)!important;
+  margin:18px auto 8px!important;
+}
+.ac-dragon.pastel-dragon-mounted.battle-boss{
+  width:clamp(220px,35vw,330px)!important;
+  aspect-ratio:1/1!important;
+  margin:0 auto!important;
+  filter:drop-shadow(0 18px 22px rgba(20,30,40,.14))!important;
+}
+.ac-dragon.pastel-dragon-mounted.hurt{
+  animation:pdBossHit .34s cubic-bezier(.2,.8,.2,1)!important;
+}
+.ac-dragon.pastel-dragon-mounted.shield-hit{
+  animation:pdBossShield .42s cubic-bezier(.2,.8,.2,1)!important;
+}
+.ac-dragon.pastel-dragon-mounted.mode-rage .pd-stage{
+  animation:pdRageBody .72s ease-in-out infinite alternate;
+}
+.ac-dragon.pastel-dragon-mounted.mode-angry .pd-stage{
+  animation:pdAngryBody 1.45s ease-in-out infinite;
+}
+.ac-dragon.pastel-dragon-mounted.mode-cry .pd-stage{
+  animation:pdCryBody 2.2s ease-in-out infinite;
+}
+.di-beast.pastel-dragon-mounted{
+  width:clamp(220px,38vw,360px)!important;
+  aspect-ratio:1/1!important;
+}
+.di-beast.pastel-dragon-mounted::before,
+.di-beast.pastel-dragon-mounted::after{display:none!important}
+.di-beast.pastel-dragon-mounted .pd-stage{
+  filter:drop-shadow(0 26px 36px rgba(0,0,0,.45)) saturate(.92);
+}
+.di-beast.pastel-dragon-mounted[data-pd-phase="rage"] .pd-stage{
+  filter:drop-shadow(0 26px 36px rgba(0,0,0,.48)) saturate(1.08) contrast(1.03);
+}
+
+.pd-stage{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:visible;
+  pointer-events:none;
+  user-select:none;
+  transform-origin:50% 72%;
+}
+.pd-expr,.pd-blink{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  pointer-events:none;
+}
+.pd-expr{
+  transition:opacity 330ms ease;
+  will-change:opacity;
+  animation:pdIdleFloat 4.2s ease-in-out infinite;
+}
+.pd-expr.on{opacity:1}
+.pd-main,.pd-chest,.pd-belly,.pd-blink-eyes{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.pd-main{z-index:1}
+.pd-chest{
+  z-index:2;
+  transform-origin:50% 60%;
+  will-change:transform;
+  -webkit-mask-image:radial-gradient(ellipse 19% 24% at 50% 61%,rgba(0,0,0,1) 0%,rgba(0,0,0,.98) 48%,rgba(0,0,0,.55) 72%,rgba(0,0,0,0) 100%);
+  mask-image:radial-gradient(ellipse 19% 24% at 50% 61%,rgba(0,0,0,1) 0%,rgba(0,0,0,.98) 48%,rgba(0,0,0,.55) 72%,rgba(0,0,0,0) 100%);
+  animation:pdBreathe 3.8s cubic-bezier(.42,0,.58,1) infinite;
+}
+.pd-belly{
+  z-index:3;
+  transform-origin:50% 69%;
+  will-change:transform;
+  -webkit-mask-image:radial-gradient(ellipse 16% 12% at 50% 69%,rgba(0,0,0,.72) 0%,rgba(0,0,0,.42) 58%,rgba(0,0,0,0) 100%);
+  mask-image:radial-gradient(ellipse 16% 12% at 50% 69%,rgba(0,0,0,.72) 0%,rgba(0,0,0,.42) 58%,rgba(0,0,0,0) 100%);
+  animation:pdBellyBreathe 3.8s cubic-bezier(.42,0,.58,1) infinite;
+}
+.pd-blink{z-index:9;opacity:0}
+.pd-blink-eyes{z-index:10}
+.ac-dragon.pastel-dragon-mounted.mode-angry .pd-stage{
+  filter:saturate(1.04) drop-shadow(0 11px 20px rgba(202,89,74,.13));
+}
+.ac-dragon.pastel-dragon-mounted.mode-rage .pd-stage{
+  filter:saturate(1.1) contrast(1.025) drop-shadow(0 12px 22px rgba(201,74,67,.18));
+}
+.ac-dragon.pastel-dragon-mounted.mode-cry .pd-stage{
+  filter:saturate(.82) brightness(1.03) drop-shadow(0 13px 22px rgba(111,174,210,.15));
+}
+
+/* Keep existing phase auras / shield pseudo-elements behind the supplied dragon. */
+.ac-dragon.pastel-dragon-mounted.battle-boss::before,
+.ac-dragon.pastel-dragon-mounted.battle-boss::after{z-index:-1!important}
+.ac-dragon-stage:has(.pastel-dragon-mounted){min-height:clamp(290px,43vw,410px)}
+.ac-enemy-zone .ac-dragon-talk{margin-top:4px!important}
+
+@keyframes pdIdleFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-1.3px)}
+}
+@keyframes pdBreathe{
+  0%,100%{transform:translateY(0) scaleX(1) scaleY(1)}
+  42%{transform:translateY(-1.1px) scaleX(1.006) scaleY(1.016)}
+  56%{transform:translateY(-1.25px) scaleX(1.007) scaleY(1.018)}
+}
+@keyframes pdBellyBreathe{
+  0%,100%{transform:scale(1)}
+  50%{transform:scaleX(1.004) scaleY(1.008)}
+}
+@keyframes pdAngryBody{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-2px) rotate(-.35deg)}
+}
+@keyframes pdRageBody{
+  0%{transform:translateX(-2px) rotate(-.45deg) scale(1)}
+  100%{transform:translateX(2px) rotate(.45deg) scale(1.018)}
+}
+@keyframes pdCryBody{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(2px) scale(.995)}
+}
+@keyframes pdBossHit{
+  0%{transform:translateX(0) rotate(0) scale(1)}
+  28%{transform:translateX(-10px) rotate(-2.5deg) scale(.975)}
+  58%{transform:translateX(7px) rotate(1.7deg) scale(1.02)}
+  100%{transform:none}
+}
+@keyframes pdBossShield{
+  0%{transform:scale(1)}
+  42%{transform:scale(.965)}
+  100%{transform:scale(1)}
+}
+
+@media(max-width:620px){
+  .ac-dragon.pastel-dragon-mounted.battle-boss{width:min(260px,76vw)!important}
+  .ac-dragon.pastel-dragon-mounted:not(.battle-boss){width:min(240px,72vw)!important}
+  .ac-dragon-stage:has(.pastel-dragon-mounted){min-height:300px!important}
+  .di-beast.pastel-dragon-mounted{width:min(290px,78vw)!important}
+}
+@media(max-width:420px){
+  .ac-dragon.pastel-dragon-mounted.battle-boss{width:min(235px,75vw)!important}
+  .ac-dragon-stage:has(.pastel-dragon-mounted){min-height:275px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .pd-expr,.pd-chest,.pd-belly,
+  .ac-dragon.pastel-dragon-mounted .pd-stage{animation:none!important}
+}

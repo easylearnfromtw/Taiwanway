@@ -1,0 +1,5 @@
+
+.profile-name-help{margin-bottom:3px!important}
+.profile-name-help-en{margin-top:0!important;max-width:76ch;line-height:1.5;color:var(--muted);font-size:11px}
+.profile-level-line{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;margin-top:5px}
+.profile-level-line b{font-size:1.05em;color:var(--text)}

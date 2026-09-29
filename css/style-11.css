@@ -1,0 +1,37 @@
+
+/* Performance pass: preserve the look, reduce expensive repaints on mobile. */
+.nav,.tabbar,.glass,.pid-media,.lens,.sheet,.modal,.search-overlay{
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+.pid-media,.lens,.tabbar,.nav{transform:translateZ(0)}
+.pid-media video{contain:paint;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pid-sheen{will-change:opacity,background-position}
+.reveal,.rise{will-change:auto}
+.reveal:not(.in){transform:translate3d(0,14px,0)}
+.reveal.in,.rise{transform:translate3d(0,0,0)}
+@media(max-width:820px){
+  .glass{
+    -webkit-backdrop-filter:blur(14px) saturate(148%)!important;
+    backdrop-filter:blur(14px) saturate(148%)!important;
+  }
+  .nav,.tabbar{
+    -webkit-backdrop-filter:blur(16px) saturate(150%)!important;
+    backdrop-filter:blur(16px) saturate(150%)!important;
+  }
+  body::before{opacity:.13!important;mix-blend-mode:normal!important}
+  .pid-sheen{opacity:.58!important}
+  .pid-media{box-shadow:0 18px 40px rgba(41,50,71,.14),0 8px 18px rgba(41,50,71,.07)!important}
+  .pid-media.tilting{box-shadow:0 22px 48px rgba(41,50,71,.16),0 10px 22px rgba(41,50,71,.08)!important}
+}
+@media(max-width:540px){
+  .glass{
+    -webkit-backdrop-filter:blur(12px) saturate(142%)!important;
+    backdrop-filter:blur(12px) saturate(142%)!important;
+  }
+  .lens{transition:scale .22s var(--spring)}
+  .pid-media{transition:transform .16s ease-out,box-shadow .18s ease-out!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .pid-sheen{display:none!important}
+}

@@ -1,0 +1,38 @@
+
+/* Final slot-mask behavior: the certificate must never appear above the printer.
+   The page remains hidden until it exits below the machine, giving a true print-out feel. */
+.caf-output-window{position:absolute;z-index:3;top:118px;left:50%;transform:translateX(-50%);width:min(376px,76vw);height:calc(100% - 132px);overflow:hidden;pointer-events:none}
+.caf-output-window .caf-paper{position:absolute!important;top:0!important;left:50%!important;width:100%!important;aspect-ratio:1086/1536;transform-origin:50% 0!important;translate:0 0!important;transform:translate(-50%,-101.5%) scale(.965)!important;animation:cafPaperFromOutputSlot 4.35s cubic-bezier(.22,.72,.2,1) .42s forwards!important}
+.caf-output-window .caf-paper::after{animation:cafScan 3.45s linear .88s forwards!important}
+.caf-output-window .caf-paper-inner,.caf-output-window .caf-paper-ink{animation:cafInkReveal 3.45s linear .88s forwards!important}
+.caf-machine{z-index:6!important}
+@keyframes cafPaperFromOutputSlot{0%,8%{transform:translate(-50%,-101.5%) scale(.965)}30%{transform:translate(-50%,-79%) scale(.965)}42%{transform:translate(-50%,-62%) scale(.965)}54%{transform:translate(-50%,-62%) scale(.965)}78%{transform:translate(-50%,-20%) scale(.965)}94%{transform:translate(-50%,-4%) scale(.965)}100%{transform:translate(-50%,2%) scale(.965)}}
+@media(max-width:520px){.caf-output-window{top:102px;width:min(342px,82vw);height:calc(100% - 114px)}}
+@media(prefers-reduced-motion:reduce){.caf-output-window .caf-paper{animation:none!important;transform:translate(-50%,2%) scale(.965)!important}}
+
+/* ===== Reading lens clarity fix: keep magnified center optically clear ===== */
+.lens{filter:drop-shadow(0 12px 20px rgba(0,0,0,.20))!important;}
+.lens-view{
+  background:var(--bg)!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  filter:none!important;
+}
+.lens-clone{
+  filter:none!important;
+  opacity:1!important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+/* Do not re-apply frosted-glass blur inside the cloned/magnified scene. */
+.lens-clone .glass,
+.lens-clone [style*="backdrop-filter"]{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+/* Reflection belongs on the rim, not over the optical center. */
+.lens-ring{background:transparent!important;}
+.lens-ring::before{
+  left:24px!important;top:12px!important;width:48px!important;height:12px!important;
+  opacity:.28!important;
+}

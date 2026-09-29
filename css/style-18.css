@@ -1,0 +1,27 @@
+
+.egg-title-congrats{
+  position:fixed;inset:0;z-index:360;display:grid;place-items:center;
+  padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  background:rgba(20,25,22,.48);-webkit-backdrop-filter:blur(14px) saturate(115%);backdrop-filter:blur(14px) saturate(115%);
+  opacity:0;transition:opacity .24s ease;
+}
+.egg-title-congrats.in{opacity:1}
+.etc-card{
+  position:relative;width:min(460px,100%);text-align:center;padding:30px 24px 24px;border-radius:30px;
+  background:linear-gradient(160deg,var(--paper),color-mix(in srgb,var(--yellow-soft) 68%,var(--paper)));
+  border:1px solid color-mix(in srgb,var(--yellow-ink) 28%,var(--line));
+  box-shadow:0 30px 90px -34px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.82);
+  transform:translateY(18px) scale(.92);transition:transform .44s var(--spring);
+}
+.egg-title-congrats.in .etc-card{transform:none}
+.etc-close{position:absolute;right:14px;top:12px;width:38px;height:38px;border-radius:999px;display:grid;place-items:center;font:700 23px/1 var(--f-ui);color:var(--muted)}
+.etc-close:hover{background:var(--paper-2);color:var(--text)}
+.etc-seal{width:64px;height:64px;margin:0 auto 16px;border-radius:20px;display:grid;place-items:center;background:var(--red);color:#FFF8EF;font:900 32px/1 var(--f-zh-serif);box-shadow:inset 0 0 0 2px rgba(255,255,255,.22),0 12px 28px -16px rgba(0,0,0,.42);rotate:-4deg}
+.etc-kicker{font:800 11px/1.3 var(--f-ui);letter-spacing:.12em;color:var(--muted)}
+.etc-card h2{margin-top:8px;font:900 clamp(26px,6vw,36px)/1.1 var(--f-zh);letter-spacing:-.03em}
+.etc-title-zh{margin-top:16px;font:900 clamp(30px,8vw,44px)/1.08 var(--f-zh-serif);color:var(--accent-text);letter-spacing:.02em}
+.etc-title-en{margin-top:7px;font:700 13px/1.4 var(--f-ui);color:var(--muted)}
+.etc-reward{margin:18px auto 0;width:max-content;max-width:100%;padding:9px 14px;border-radius:999px;background:var(--yellow-soft);color:var(--yellow-ink);font:800 13px/1.25 var(--f-ui);border:1px solid color-mix(in srgb,var(--yellow-ink) 20%,transparent)}
+.etc-ok{margin-top:22px;min-width:150px}
+@media(max-width:520px){.etc-card{padding:28px 18px 20px;border-radius:26px}.etc-seal{width:58px;height:58px;border-radius:18px}.etc-ok{width:100%}}
+@media(prefers-reduced-motion:reduce){.egg-title-congrats,.etc-card{transition-duration:.01ms!important}}

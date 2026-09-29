@@ -1,0 +1,42 @@
+
+:root{--f-hand:'Klee One','DFKai-SB','BiauKai','Noto Serif TC',cursive}
+html,body{width:100%;max-width:100%;overflow-x:clip!important;overscroll-behavior-x:none!important}
+body{touch-action:pan-y pinch-zoom}
+#app,.view,.wrap,main{max-width:100%;min-width:0}
+@supports not (overflow:clip){html,body{overflow-x:hidden!important}}
+.pid-hand{font-family:var(--f-hand)!important;font-weight:900!important;font-style:normal;letter-spacing:.025em}
+.pid-card-label{position:absolute;z-index:6;left:10.4%;top:3.0%;color:#43516c;font:900 clamp(7px,.85vw,10px)/1 var(--f-zh-serif);letter-spacing:.14em;transform:translateZ(28px) rotate(-1deg);text-shadow:0 1px 0 rgba(255,255,255,.75)}
+.pid-card-name{left:10.1%!important;top:4.75%!important;width:52%!important;color:#293247!important;font-size:clamp(12px,1.9vw,19px)!important;line-height:1!important;text-overflow:clip!important;text-shadow:0 1px 0 rgba(255,255,255,.72),0 1px 1px rgba(41,50,71,.13)!important;transform:translateZ(30px) rotate(-1.05deg)!important}
+.pid-card-id{display:none!important}
+.pid-live{display:none!important}
+/* Exact source-art geometry: grid begins ~9.55% from the left, 26.1% wide, four 4.45%-high rows. */
+.pid-overlay-row{position:absolute!important;z-index:7!important;left:9.55%!important;width:26.10%!important;height:4.45%!important;display:block!important;opacity:0;transform:translateZ(30px) translateY(5px)!important;filter:none!important;pointer-events:none}
+.pid-overlay-row.r1{top:23.0%!important;--mark:#F2E85A;--mark2:#FFF08A}
+.pid-overlay-row.r2{top:30.42%!important;--mark:#FF9E78;--mark2:#FFC09D}
+.pid-overlay-row.r3{top:37.82%!important;--mark:#70D8C4;--mark2:#A0EAD9}
+.pid-overlay-row.r4{top:45.20%!important;--mark:#B9A5FF;--mark2:#D0C2FF}
+.pid-row-label{position:absolute;z-index:4;left:0;top:-31%;color:#34405a;font-size:clamp(6.5px,.72vw,9px);font-weight:900;line-height:1;letter-spacing:.05em;text-shadow:0 1px 0 rgba(255,255,255,.78);transform:rotate(-1deg)}
+.pid-row-value{position:absolute;z-index:5;left:104%;top:22%;min-width:22px;color:#293247;font-size:clamp(8px,.9vw,11px);line-height:1;text-align:left;text-shadow:0 1px 0 rgba(255,255,255,.72);transform:rotate(-2deg)}
+.pid-segs{position:absolute;inset:0;display:grid!important;grid-template-columns:repeat(8,1fr)!important;gap:0!important;width:100%!important;height:100%!important;padding:0!important;box-sizing:border-box!important}
+.pid-segs i{position:relative;display:block!important;height:100%;border-radius:0!important;background:transparent!important;overflow:hidden;box-shadow:none!important}
+.pid-segs i b{position:absolute;z-index:2;left:1px;top:10%;bottom:9%;width:calc(var(--fill,0%));min-width:0;border-radius:2px 3px 2px 2px;background:
+ repeating-linear-gradient(101deg,rgba(255,255,255,.05) 0 4px,rgba(255,255,255,.30) 4px 6px,rgba(59,54,30,.06) 6px 7px,transparent 7px 10px),
+ linear-gradient(91deg,var(--mark),var(--mark2) 58%,var(--mark));
+ opacity:.78;mix-blend-mode:multiply;box-shadow:0 1px 1px rgba(51,57,73,.13),inset 0 1px rgba(255,255,255,.35);transform:skewX(-3deg) rotate(calc((var(--fill,0%) - 50%) * .003deg));clip-path:polygon(0 9%,97% 0,100% 84%,4% 100%)}
+.pid-segs i:not(:last-child){border-right:1px solid rgba(52,62,82,.30)}
+.profile-id-card.fx-on .pid-overlay-row{animation:pidCellInkIn .72s var(--spring) both;animation-delay:calc(var(--delay,0)*90ms + 130ms)}
+.profile-id-card.fx-on .pid-segs i b{animation:pidMarkerStroke .72s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--delay,0)*90ms + 160ms);transform-origin:left center}
+@keyframes pidCellInkIn{0%{opacity:0;transform:translateZ(30px) translateY(5px)}100%{opacity:1;transform:translateZ(30px) translateY(0)}}
+@keyframes pidMarkerStroke{0%{scale:0 1;filter:saturate(.7)}65%{scale:1.035 1.03;filter:saturate(1.08)}100%{scale:1 1;filter:none}}
+/* keep the original artwork dominant; 3D is tactile, not glossy-game-card heavy */
+.pid-sheen{opacity:.48!important}
+.pid-tilt-note{background:rgba(23,75,58,.82)!important;box-shadow:0 5px 12px rgba(23,75,58,.16)!important}
+@media(max-width:540px){
+  .pid-card-label{font-size:6.8px;top:2.9%}
+  .pid-card-name{font-size:12px!important;top:4.7%!important}
+  .pid-row-label{font-size:6.2px;top:-32%}
+  .pid-row-value{font-size:8px;left:103%;top:24%}
+}
+@media(prefers-reduced-motion:reduce){
+ .profile-id-card.fx-on .pid-overlay-row,.profile-id-card.fx-on .pid-segs i b{animation:none!important;opacity:1;scale:1}
+}

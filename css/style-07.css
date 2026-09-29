@@ -1,0 +1,96 @@
+
+/* ---------- Final visual system / interaction polish ---------- */
+html{scroll-padding-top:94px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-kerning:normal;font-synthesis:none;text-rendering:optimizeLegibility}
+:where(.zh,.tz,.serif-zh,.cng-name,.csm-award,.csm-name,.caf-dyn-award,.caf-dyn-name){font-feature-settings:"palt" 1,"kern" 1}
+
+/* Consistent readable widths and rhythm. */
+.view>.mast,.view>.sec-head,.reading .sheet,.privacy-layout{min-width:0}
+.sec-head>div,.teaser-copy,.csm-copy,.cng-body,.ac-tierhead>div{min-width:0}
+.h1,.h2,.h3,.lede,.phr .zh,.phr .en{overflow-wrap:break-word}
+
+/* Buttons: one tactile system across desktop and mobile. */
+.btn,.btn-hero,.chip-btn,.icon-btn,.play,.known,.ac-switch,.ac-fav{touch-action:manipulation}
+.btn,.chip-btn{min-height:44px}
+.btn.sm{min-height:38px}
+.icon-btn,.play{min-width:42px;min-height:42px}
+@media(hover:hover) and (pointer:fine){
+  .btn:not(:disabled):hover,.chip-btn:not(:disabled):hover{translate:0 -1px}
+  .icon-btn:not(:disabled):hover{scale:1.035}
+}
+
+/* Form polish and explicit 6-character certificate-name behavior. */
+.profile-name-field>input,.cng-field input{caret-color:var(--accent);text-wrap:nowrap}
+.cng-field input{min-height:58px;font-size:clamp(22px,5vw,28px);letter-spacing:.075em}
+.cng-field-head{min-height:24px}
+.cng-count{font-variant-numeric:tabular-nums}
+.cng-preview{min-height:54px}
+.cng-preview strong{max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Certificate claim card feels like a milestone rather than a warning. */
+.cert-claim{position:relative;overflow:hidden;border-style:solid!important;background:linear-gradient(135deg,color-mix(in srgb,var(--paper) 97%,var(--tc,#174B3A) 3%),var(--paper))}
+.cert-claim::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--tc,#174B3A);opacity:.9}
+.cert-claim .cc-seal{box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 9px 20px -16px rgba(0,0,0,.4)}
+
+/* Print ritual status and official certificate text remain precisely centered. */
+.caf-dyn-award,.caf-dyn-name,.csm-award,.csm-name,.cert-template-award,.cert-template-name{
+  font-family:'Noto Serif TC','Songti TC','PMingLiU',serif!important;
+  font-weight:700!important;font-kerning:normal!important;text-rendering:geometricPrecision;
+  letter-spacing:.025em!important;line-height:1!important;
+}
+.caf-dyn-award,.csm-award,.cert-template-award{padding-inline:5%!important}
+.caf-dyn-name,.csm-name,.cert-template-name{padding-inline:7%!important}
+.caf-status-card{box-shadow:0 18px 38px -28px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.9)}
+.caf-step{letter-spacing:.015em!important}
+.caf-pct{font-variant-numeric:tabular-nums}
+
+/* Completion modal: same editorial language as the site. */
+.cert-save-modal{overscroll-behavior:contain}
+.csm-card{position:relative;isolation:isolate;overflow:hidden}
+.csm-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(var(--red),var(--yellow));opacity:.92;z-index:-1}
+.csm-preview{border-radius:12px;box-shadow:0 28px 58px -34px rgba(41,32,23,.55),0 2px 8px -5px rgba(41,32,23,.22)}
+.csm-preview::after{content:"正式證書預覽";position:absolute;right:10px;bottom:10px;padding:5px 8px;border-radius:999px;background:rgba(255,253,248,.88);border:1px solid rgba(110,95,75,.16);color:#665d52;font:700 9px/1 var(--f-ui);letter-spacing:.08em;backdrop-filter:blur(8px)}
+.csm-title{text-wrap:balance}
+.csm-meta span{min-height:68px;align-content:center}
+.csm-save-state{margin-top:10px;min-height:20px;color:var(--muted);font:600 11.5px/1.55 var(--f-zh)}
+.csm-actions .btn{min-height:50px}
+.csm-actions .csm-return{background:transparent;border-color:transparent;box-shadow:none;color:var(--muted)}
+.csm-actions .csm-return:hover{background:var(--paper-2);color:var(--text)}
+.csm-saving .csm-actions .btn:not([aria-busy="true"]){opacity:.56}
+.csm-actions [aria-busy="true"]{cursor:progress}
+
+/* Return congratulations: short, premium, non-blocking. */
+.cert-return-congrats{border-radius:24px;border-color:color-mix(in srgb,var(--line) 75%,var(--accent) 12%);box-shadow:0 22px 50px -28px rgba(18,40,30,.42),inset 0 1px rgba(255,255,255,.76)}
+.crc-copy b{letter-spacing:-.018em}.crc-copy span{line-height:1.55}
+
+/* Privacy and About long-form content stays calm on narrow screens. */
+.privacy-sec p,.privacy-sec li,.about-manifesto-copy .phr .zh,.about-manifesto-copy .phr .en{max-width:72ch}
+
+/* Bottom-tab safe area and no modal/background fighting. */
+html.xw-modal-open,html.xw-modal-open body{overflow:hidden!important;overscroll-behavior:none}
+@media(max-width:720px){
+  .cert-save-modal{place-items:start center;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom))}
+  .csm-card{grid-template-columns:1fr!important;width:min(520px,100%);gap:20px;padding:20px 18px 18px;border-radius:28px}
+  .csm-preview{width:min(64vw,255px)}
+  .csm-title{font-size:clamp(29px,8.7vw,40px);margin-top:10px}
+  .csm-lede{font-size:14px;line-height:1.72}
+  .csm-meta{margin:17px 0 13px}
+  .csm-actions{margin-top:18px}
+  .csm-actions .btn{width:100%}
+  .cert-return-congrats{top:max(70px,calc(env(safe-area-inset-top) + 54px));width:calc(100vw - 22px)}
+  .cng-card{max-height:calc(100svh - 28px);overflow:auto;border-radius:26px}
+}
+@media(max-width:480px){
+  .csm-preview{width:min(61vw,225px)}
+  .csm-meta{grid-template-columns:1fr 1fr!important}
+  .csm-meta span{padding:10px 11px;min-height:61px}
+  .csm-meta b{font-size:14px}
+  .csm-note{font-size:11.5px}
+  .cng-top{grid-template-columns:46px 1fr;gap:12px;padding-top:21px;padding-bottom:16px}
+  .cng-mark{width:44px;height:44px;border-radius:12px;font-size:24px}
+  .cng-top h2{font-size:22px}.cng-body{gap:15px;padding-bottom:22px}
+}
+@media(max-width:370px){.csm-meta{grid-template-columns:1fr!important}.csm-preview{width:min(68vw,215px)}}
+@media(prefers-reduced-motion:reduce){
+  .csm-card,.cert-return-congrats,.cng-card{transition-duration:.01ms!important}
+}

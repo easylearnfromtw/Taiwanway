@@ -1,0 +1,31 @@
+
+/*
+  Scroll-axis fix:
+  - The page must keep native vertical scrolling (including iOS momentum scroll).
+  - Horizontal page scrolling stays disabled.
+  - Do not override intentional scroll locks while welcome/share/certificate modals are open.
+*/
+html:not(.wl-lock):not(.sh-lock):not(.xw-modal-open){
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior-x:none!important;
+  overscroll-behavior-y:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+html:not(.wl-lock):not(.sh-lock):not(.xw-modal-open) body{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  overflow-y:visible!important;
+  overscroll-behavior-x:none!important;
+  touch-action:pan-y pinch-zoom!important;
+}
+/* The onboarding screen is fixed; only its stage should scroll vertically. */
+#welcome .wl-stage{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y!important;
+}
