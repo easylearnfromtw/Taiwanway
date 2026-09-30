@@ -82030,17 +82030,19 @@ const ShopSystem = (() => {
   function rainCountdown(ms){const total=Math.max(0,Math.ceil(ms/60000)),days=Math.floor(total/1440),hours=Math.floor((total%1440)/60),mins=total%60;return `${days?days+'天 ':''}${hours}小時 ${mins}分`; }
   function marketEventHtml(){const m=marketState();if(m.rainActive)return `<section class="night-market-event rain"><span class="event-kicker">NEW PLAYER EVENT · 新手限定</span><h2 class="serif-zh">天降甘霖</h2><p>加入遊戲前 72 小時，夜市所有商品一律以<strong>原始價格 5 折</strong>計算並無條件進位，而且<strong>不與高麗菜那桌、O森島民證書、買多優惠或戰後物價疊加</strong>。${m.postDragonInflation?'戰後漲價已永久記錄，活動結束後才會開始生效。':''}</p><span class="event-countdown">剩 ${rainCountdown(m.rainRemaining)}</span></section>`;if(m.postDragonInflation)return `<section class="night-market-event postwar"><span class="event-kicker">POST-DRAGON ECONOMY · 永久狀態</span><h2 class="serif-zh">戰後經濟委靡，天際英才</h2><p>第一章魔龍討伐後，夜市原始價格永久上漲 50%，各幣別先無條件進位，再套用你持有的高麗菜那桌、O森與買多優惠。</p></section>`;return '';}
   function showPostDragonNotice(){const x=ensure();if(!x.postDragonNoticePending||document.querySelector('.postwar-economy-modal'))return false;if(document.querySelector('.closed-beta-letter'))return false;const m=marketState(),el=document.createElement('div');el.className='postwar-economy-modal';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.innerHTML=`<section class="postwar-economy-card"><div class="seal serif-zh">漲</div><small class="eyebrow">POST-DRAGON ECONOMY · 第一章後遺症</small><h2 class="h2 serif-zh">戰後經濟委靡，天際英才</h2><p>魔龍倒下後，夜市進入永久戰後物價：<strong>所有商品原始價格 +50%</strong>，珍珠與貢丸都各自無條件進位。</p><div class="price-law">${m.rainActive?'你目前仍在「天降甘霖」72 小時內，因此先維持原始價格 5 折、不疊加；活動結束後才套用永久 +50%。':'之後價格順序：戰後價 → 高麗菜那桌 → O森珍珠 −1 → 買多優惠 → 最終進位。'}</div><div class="actions"><button type="button" class="btn pri" data-postwar-ok>知道了</button></div></section>`;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));el.querySelector('[data-postwar-ok]').onclick=()=>{x.postDragonNoticePending=0;x.postDragonNoticeShown=Date.now();save();el.classList.remove('in');setTimeout(()=>el.remove(),240);};return true;}
-  function cardHtml(item){
+  function cardHtml(item,index=0){
     const q=quote(item.id,qtyFor(item.id)),g=G(),owned=item.type==='permanent'&&hasPermanent(item.id),can=!owned&&g.pearls>=q.pearlTotal&&g.gongwan>=q.gongwanTotal,inv=item.type==='consumable'?stock(item.id):0,act=item.type==='consumable'?activeCount(item.id):0,art=window.TWW_ITEM_ART?.[item.id]||'';
     const missing=[];if(!owned&&g.pearls<q.pearlTotal)missing.push(`珍珠 ${q.pearlTotal-g.pearls}`);if(!owned&&g.gongwan<q.gongwanTotal)missing.push(`貢丸 ${q.gongwanTotal-g.gongwan}`);
-    const state=item.type==='consumable'?`<div class="shop-state"><span>持有 <b data-shop-stock="${item.id}">${inv}</b></span><span>已啟用 <b data-shop-active="${item.id}">${act}</b></span>${missing.length?`<span class="shop-missing">還差 ${missing.join(' · ')}</span>`:''}</div>`:`<div class="shop-state"><span>${owned?'已持有 · 永久生效':'永久稱號 · 只可購買一次'}</span>${missing.length?`<span class="shop-missing">還差 ${missing.join(' · ')}</span>`:''}</div>`;
-    const qty=item.type==='consumable'?`<div class="shop-qty" aria-label="購買數量">${[1,3,5,10].map(n=>`<button type="button" data-shop-qty="${item.id}" data-qty="${n}" class="${q.qty===n?'on':''}">×${n}</button>`).join('')}</div>`:'';
+    const state=item.type==='consumable'?`<div class="shop-state"><span>IN BAG <b data-shop-stock="${item.id}">${inv}</b></span><span>ACTIVE <b data-shop-active="${item.id}">${act}</b></span>${missing.length?`<span class="shop-missing">SHORT · ${missing.join(' · ')}</span>`:''}</div>`:`<div class="shop-state"><span>${owned?'OWNED · PERMANENT':'ONE-OFF · PERMANENT'}</span>${missing.length?`<span class="shop-missing">SHORT · ${missing.join(' · ')}</span>`:''}</div>`;
+    const qty=item.type==='consumable'?`<div class="shop-qty" aria-label="購買數量"><span class="shop-qty-label">QTY</span>${[1,3,5,10].map(n=>`<button type="button" data-shop-qty="${item.id}" data-qty="${n}" class="${q.qty===n?'on':''}">${n}</button>`).join('')}</div>`:'';
     const visual=art?`<span class="shop-item-art ${item.type==='permanent'?'wide':''}" aria-hidden="true"><img src="${art}" alt="" loading="lazy" decoding="async"></span>`:`<span class="shop-mark serif-zh">${item.id==='osenResident'?'森':item.name[0]}</span>`;
-    return `<article class="card shop-item ${item.type==='permanent'?'premium':''}" data-shop-card="${item.id}"><div class="shop-item-top">${visual}<div><small>${esc(item.en)}</small><h3>${esc(item.name)}</h3></div><div class="shop-price">${priceHtml(item,q)}</div></div><p>${esc(item.effect)}</p>${q.discounted||hasCabbageTable()||hasOsen()?`<span class="shop-discount-badge">夜市價格 · ${esc(discountLabel(q)||'已套用')}</span>`:''}${state}${qty}<div class="shop-actions"><button type="button" class="btn ghost sm" data-shop-detail="${item.id}">看詳情</button><button type="button" class="btn ${item.type==='permanent'?'pri':'ghost'} sm" data-shop-buy="${item.id}" data-buy-qty="${q.qty}" ${can?'':'disabled'}>${owned?'已持有':can?`購買 ×${q.qty}`:`還差 ${esc(missing.join(' · '))}`}</button>${item.type==='consumable'?`<button type="button" class="btn pri sm" data-shop-activate="${item.id}" ${inv>0?'':'disabled'}>啟用</button>`:''}</div></article>`;
+    const catLabel={daily:'DAILY EDIT',challenge:'FIELD KIT',dragon:'DRAGON EDIT',permanent:'COLLECTOR'}[item.cat]||'SELECT';
+    const no=String((Number(index)||0)+1).padStart(2,'0');
+    return `<article class="card shop-item shop-editorial-card ${index===0?'editorial-lead':''} ${item.type==='permanent'?'premium':''}" data-shop-card="${item.id}"><div class="shop-editorial-media">${visual}<span class="shop-editorial-no">${no}</span><span class="shop-editorial-cat">${catLabel}</span></div><div class="shop-editorial-content"><div class="shop-item-top"><div class="shop-item-title"><small>${esc(item.en)}</small><h3>${esc(item.name)}</h3></div><div class="shop-price"><small>PRICE</small>${priceHtml(item,q)}</div></div><p class="shop-editorial-dek">${esc(item.effect)}</p>${q.discounted||hasCabbageTable()||hasOsen()?`<span class="shop-discount-badge">MARKET PRICE · ${esc(discountLabel(q)||'已套用')}</span>`:''}${state}${qty}<div class="shop-actions"><button type="button" class="btn ghost sm" data-shop-detail="${item.id}">DETAILS</button><button type="button" class="btn ${item.type==='permanent'?'pri':'ghost'} sm" data-shop-buy="${item.id}" data-buy-qty="${q.qty}" ${can?'':'disabled'}>${owned?'OWNED':can?`ADD ×${q.qty}`:`不足資源`}</button>${item.type==='consumable'?`<button type="button" class="btn pri sm" data-shop-activate="${item.id}" ${inv>0?'':'disabled'}>啟用 USE</button>`:''}</div></div></article>`;
   }
   function inventoryHtml(){const rows=CATALOG.filter(i=>i.type==='consumable'&&(stock(i.id)||activeCount(i.id))).map(i=>{const art=window.TWW_ITEM_ART?.[i.id]||'';return `<div class="shop-inventory-row">${art?`<span class="shop-inventory-art"><img src="${art}" alt="" loading="lazy"></span>`:''}<div><b>${esc(i.name)}</b><small>持有 ${stock(i.id)} · 已啟用 ${activeCount(i.id)}</small></div><button class="btn pri sm" data-shop-activate="${i.id}" ${stock(i.id)>0?'':'disabled'}>啟用</button></div>`}).join('')||'<p class="muted">目前沒有夜市道具。</p>';return `<div class="shop-inventory-drawer" role="dialog" aria-modal="true"><section class="shop-sheet-card"><div class="shop-sheet-head"><div><small>MY ITEMS</small><h2 class="serif-zh">我的道具</h2></div><button class="shop-sheet-close" data-shop-close="inventory" aria-label="關閉">×</button></div><div class="shop-inventory-list">${rows}${hasOsen()?`<div class="shop-inventory-row"><span class="shop-inventory-art"><img src="${window.TWW_ITEM_ART?.osenResident||''}" alt="" loading="lazy"></span><div><b>O森島民證書</b><small>永久被動 ON</small></div><span>永久</span></div>`:''}</div></section></div>`;}
   function detailHtml(id){const item=byId(id);if(!item)return '';const q=quote(id,qtyFor(id)),art=window.TWW_ITEM_ART?.[id]||'';return `<div class="shop-detail-sheet" role="dialog" aria-modal="true"><section class="shop-sheet-card"><div class="shop-sheet-head"><div><small>${esc(item.en)}</small><h2 class="serif-zh">${esc(item.name)}</h2></div><button class="shop-sheet-close" data-shop-close="detail" aria-label="關閉">×</button></div>${art?`<div class="shop-detail-art"><img src="${art}" alt="${esc(item.name)}" decoding="async"></div>`:''}<div class="shop-detail-effect">${esc(item.effect)}</div><div class="shop-price">${priceHtml(item,q)}</div>${item.type==='consumable'?`<div class="shop-qty" style="margin-top:12px">${[1,3,5,10].map(n=>`<button type="button" data-shop-qty="${item.id}" data-qty="${n}" class="${q.qty===n?'on':''}">×${n}</button>`).join('')}</div>`:''}<p class="small muted">${discountLabel(q)||'目前沒有套用折扣。'}${q.rate<1?` · 最終採無條件進位`:''}</p><div class="shop-actions"><button type="button" class="btn pri" data-shop-buy="${item.id}" data-buy-qty="${q.qty}">${item.type==='permanent'&&hasPermanent(item.id)?'已持有':`以 ${priceText(q)} 購買${item.type==='consumable'?` ×${q.qty}`:''}`}</button></div></section></div>`;}
-  function pageHtml(){const g=G(),items=CATALOG.filter(i=>ui.filter==='all'||i.cat===ui.filter),m=marketState(),scene=currentMarketScene();setTimeout(()=>{try{mountMarketScene(true);}catch(_){}},0);return `<div class="view wrap shop-view night-market-view"><div class="night-market-hero" data-market-scene-root data-market-scene="${scene.key}">${marketSceneHeroHtml(scene)}</div>${marketEventHtml()}<section class="card night-market-wallet"><span>${PEARL}<b data-pearl-count>${g.pearls}</b><small>珍珠</small></span><span>${GONGWAN}<b data-gongwan-count>${g.gongwan}</b><small>貢丸</small></span>${hasCabbageTable()?`<span class="passive cabbage"><b>高麗菜那桌</b><small>${m.rainActive?'天降甘霖期間暫停':'5折 · 無條件進位'}</small></span>`:''}${hasOsen()?`<span class="passive"><b>O森島民證書</b><small>${m.rainActive?'天降甘霖期間暫停':'島民優惠 ON'}</small></span>`:''}</section>${window.GachaSystem&&window.GachaSystem.panelHtml?window.GachaSystem.panelHtml():''}<div class="night-market-toolbar"><div class="night-market-filters">${FILTERS.map(([id,label])=>`<button type="button" class="night-market-filter ${ui.filter===id?'on':''}" data-shop-filter="${id}">${label}</button>`).join('')}</div><button type="button" class="btn ghost sm night-market-inventory-btn" data-shop-inventory>我的道具</button></div><div class="shop-grid">${items.map(cardHtml).join('')}</div><section class="card shop-note"><b>夜市價格規則</b><p>${m.rainActive?'「天降甘霖」期間：所有商品只套原始價格 5 折並無條件進位，其他優惠與戰後漲價全部暫停、不疊加。':'正常順序：戰後物價（若已屠龍）原始價格 ×1.5 並進位 → 高麗菜那桌 5 折進位 → O森珍珠 −1（最低 1）→ 數量 → 買多優惠（×3 95折、×5 9折、6–9 個 88折、10 個以上 85折）→ 最終各幣別無條件進位。'}</p></section>${ui.detailItem?detailHtml(ui.detailItem):''}${ui.inventoryOpen?inventoryHtml():''}${foot()}</div>`;}
+  function pageHtml(){const g=G(),items=CATALOG.filter(i=>ui.filter==='all'||i.cat===ui.filter),m=marketState(),scene=currentMarketScene();setTimeout(()=>{try{mountMarketScene(true);}catch(_){}},0);return `<div class="view wrap shop-view night-market-view"><header class="shop-mag-mast"><div class="shop-mag-rule"><span>XIÁN TÁI WÉN MARKET</span><span>VOL. 01 · SELECTED IN TAIWAN</span></div><div class="shop-mag-title-row"><div><span class="shop-mag-kicker">THE NIGHT MARKET EDIT</span><h1>夜市選物誌</h1></div><p>把闖關、日常與魔龍戰需要的東西，像編輯選品一樣收進你的道具袋。</p></div></header><div class="night-market-hero shop-mag-cover" data-market-scene-root data-market-scene="${scene.key}">${marketSceneHeroHtml(scene)}</div>${marketEventHtml()}<section class="card night-market-wallet shop-mag-wallet"><span><small>PEARLS</small>${PEARL}<b data-pearl-count>${g.pearls}</b></span><span><small>GONGWAN</small>${GONGWAN}<b data-gongwan-count>${g.gongwan}</b></span>${hasCabbageTable()?`<span class="passive cabbage"><small>MEMBER BENEFIT</small><b>高麗菜那桌</b><em>${m.rainActive?'活動期間暫停':'5折 · 無條件進位'}</em></span>`:''}${hasOsen()?`<span class="passive"><small>RESIDENT BENEFIT</small><b>O森島民證書</b><em>${m.rainActive?'活動期間暫停':'島民優惠 ON'}</em></span>`:''}</section>${window.GachaSystem&&window.GachaSystem.panelHtml?window.GachaSystem.panelHtml():''}<div class="night-market-toolbar shop-mag-toolbar"><div class="night-market-filters">${FILTERS.map(([id,label])=>`<button type="button" class="night-market-filter ${ui.filter===id?'on':''}" data-shop-filter="${id}">${label}</button>`).join('')}</div><button type="button" class="btn ghost sm night-market-inventory-btn" data-shop-inventory>MY ITEMS · 我的道具</button></div><div class="shop-mag-section-head"><span>EDITOR'S SELECTION</span><b>${items.length} ITEMS</b></div><div class="shop-grid shop-mag-grid">${items.map((item,index)=>cardHtml(item,index)).join('')}</div><section class="card shop-note shop-mag-note"><span class="shop-mag-note-no">PRICE NOTE</span><div><b>夜市價格規則</b><p>${m.rainActive?'「天降甘霖」期間：所有商品只套原始價格 5 折並無條件進位，其他優惠與戰後漲價全部暫停、不疊加。':'正常順序：戰後物價（若已屠龍）原始價格 ×1.5 並進位 → 高麗菜那桌 5 折進位 → O森珍珠 −1（最低 1）→ 數量 → 買多優惠（×3 95折、×5 9折、6–9 個 88折、10 個以上 85折）→ 最終各幣別無條件進位。'}</p></div></section>${ui.detailItem?detailHtml(ui.detailItem):''}${ui.inventoryOpen?inventoryHtml():''}${foot()}</div>`;}
   function profileHtml(){const owned=CATALOG.filter(i=>i.type==='consumable'&&(stock(i.id)||activeCount(i.id)));if(ensure().postDragonNoticePending)setTimeout(()=>{try{showPostDragonNotice();}catch(_){}},420);const mini=owned.length?owned.map(i=>{const art=window.TWW_ITEM_ART?.[i.id]||'';return `<span class="shop-mini-item">${art?`<img src="${art}" alt="" loading="lazy">`:''}<span><b>${esc(i.name)}</b><small>持有 ${stock(i.id)}${activeCount(i.id)?` · 已啟用 ${activeCount(i.id)}`:''}</small></span></span>`}).join(''):'<span class="muted">目前沒有夜市道具。購買後會顯示在這裡。</span>';const osen=hasOsen()?`<span class="shop-mini-item osen-mini"><img src="${window.TWW_ITEM_ART?.osenResident||''}" alt="" loading="lazy"><span><b>O森島民證書</b><small>永久被動 ON</small></span></span>`:'';return `<section class="card shop-profile-card rise"><div class="shop-profile-head"><div><div class="eyebrow">Taiwan night market · <span class="zh-font">夜市</span></div><h2 class="h3">夜市道具 <small>Night-market inventory</small></h2></div><a class="btn pri sm" href="#shop" data-act="go" data-to="shop">前往夜市 ${I.arrow}</a></div><div class="shop-mini-stock">${mini}${osen}</div></section>`;}
   document.addEventListener('click',e=>{const b=e.target.closest('[data-shop-buy],[data-shop-activate],[data-shop-qty],[data-shop-filter],[data-shop-detail],[data-shop-close],[data-shop-inventory]');if(!b)return;if(b.dataset.shopQty){ui.qty[b.dataset.shopQty]=+b.dataset.qty||1;refreshUI();return;}if(b.dataset.shopFilter){ui.filter=b.dataset.shopFilter;ui.detailItem=null;refreshUI();return;}if(b.dataset.shopDetail){ui.detailItem=b.dataset.shopDetail;refreshUI();return;}if(b.hasAttribute('data-shop-inventory')){ui.inventoryOpen=true;refreshUI();return;}if(b.dataset.shopClose){if(b.dataset.shopClose==='detail')ui.detailItem=null;else ui.inventoryOpen=false;refreshUI();return;}if(b.dataset.shopBuy)buy(b.dataset.shopBuy,+b.dataset.buyQty||qtyFor(b.dataset.shopBuy));else if(b.dataset.shopActivate)activate(b.dataset.shopActivate);});
   ensure();
@@ -86703,28 +86705,49 @@ const XTWFriends = (()=>{
     const d=document.createElement('aside');
     d.id='xtw-friend-dock';
     d.className='xtw-friend-dock';
-    d.setAttribute('aria-label','同窗快捷功能');
-    const makeDockButton=(act,glyph,label,aria,extraClass='')=>{
-      const b=document.createElement('button');
-      b.type='button';b.className=`xtw-friend-dock-btn${extraClass?' '+extraClass:''}`;b.dataset.xfAct=act;b.setAttribute('aria-label',aria);b.title=aria;
-      const g=document.createElement('span');g.className='xtw-friend-dock-glyph';g.textContent=glyph;
-      const l=document.createElement('span');l.className='xtw-friend-dock-label';l.textContent=label;
-      b.append(g,l);
-      if(act==='book'){
-        const c=document.createElement('span');c.className='xtw-friend-dock-count num';c.dataset.xtwFriendCount='';c.textContent='…';b.appendChild(c);
-      }
-      return b;
-    };
-    // 商城獨立放在同窗快捷列上方；好友功能維持在下一層。
-    d.appendChild(makeDockButton('shop','市','商城','打開商城','xtw-friend-dock-shop'));
-    const row=document.createElement('div');row.className='xtw-friend-dock-row';
-    [
-      ['pass','證','同窗證','顯示我的同窗證'],
-      ['scan','掃','掃證','掃證相認'],
-      ['book','冊','同窗冊','打開同窗冊']
-    ].forEach(def=>row.appendChild(makeDockButton(...def)));
-    d.appendChild(row);
+    d.setAttribute('aria-label','同窗與商城');
+    const b=document.createElement('button');
+    b.type='button';b.className='xtw-friend-dock-btn';b.dataset.xfAct='hub';b.setAttribute('aria-label','打開同窗與夜市商城');b.title='同窗・商城';
+    const g=document.createElement('span');g.className='xtw-friend-dock-glyph';g.textContent='聚';
+    const cp=document.createElement('span');cp.className='xtw-friend-dock-copy';
+    const l=document.createElement('span');l.className='xtw-friend-dock-label';l.textContent='同窗・商城';
+    const s=document.createElement('span');s.className='xtw-friend-dock-sub';s.textContent='CLASSMATES · NIGHT MARKET';
+    cp.append(l,s);
+    const c=document.createElement('span');c.className='xtw-friend-dock-count num';c.dataset.xtwFriendCount='';c.textContent='…';
+    b.append(g,cp,c);d.appendChild(b);
     document.body.appendChild(d);dock=d;refreshCount().catch(()=>{});return d;
+  }
+
+  function hubStat(label,value){const d=document.createElement('div');d.className='xtw-hub-stat';const s=document.createElement('small');s.textContent=label;const b=document.createElement('b');b.textContent=String(value);d.append(s,b);return d;}
+  function hubAction(mark,title,desc,act,extra=''){
+    const b=document.createElement('button');b.type='button';b.className=`xtw-hub-action${extra?' '+extra:''}`;b.dataset.xfAct=act;
+    const m=document.createElement('span');m.className='mark';m.textContent=mark;const t=document.createElement('b');t.textContent=title;const s=document.createElement('span');s.textContent=desc;b.append(m,t,s);return b;
+  }
+  async function openHub(initialTab='friends'){
+    const p=baseModal('Gathering place · 聚所','同窗・商城','');p.classList.add('xtw-hub-panel');
+    const oldK=p.querySelector('.xtw-friend-kicker'),oldH=p.querySelector('.xtw-friend-title'),oldS=p.querySelector('.xtw-friend-sub');if(oldK)oldK.remove();if(oldH)oldH.remove();if(oldS)oldS.remove();
+    const close=p.querySelector('.xtw-friend-close');
+    const head=document.createElement('div');head.className='xtw-hub-head';
+    if(close){head.appendChild(close);}
+    const brand=document.createElement('div');brand.className='xtw-hub-brand';const seal=document.createElement('span');seal.className='xtw-hub-seal';seal.textContent='閒';const bc=document.createElement('div');const title=document.createElement('div');title.className='xtw-hub-title';title.textContent='同窗・商城';const kick=document.createElement('div');kick.className='xtw-hub-kicker';kick.textContent='XIÁN TÁI WÉN · LOCAL HUB';bc.append(title,kick);brand.append(seal,bc);head.appendChild(brand);
+    const summary=document.createElement('div');summary.className='xtw-hub-summary';const pp=publicProfile();const person=document.createElement('div');person.className='xtw-hub-person';const av=document.createElement('span');av.className='xtw-hub-avatar';av.textContent=initial(pp.name);const pc=document.createElement('span');const nm=document.createElement('b');nm.textContent=pp.name;const meta=document.createElement('small');meta.textContent=`Lv.${pp.level}${pp.title?' · '+pp.title:''}`;pc.append(nm,meta);person.append(av,pc);summary.appendChild(person);
+    const friendN=await countFriends().catch(()=>0),g=G();summary.append(hubStat('同窗',friendN),hubStat('珍珠',Math.max(0,Number(g.pearls)||0)),hubStat('貢丸',Math.max(0,Number(g.gongwan)||0)));head.appendChild(summary);p.appendChild(head);
+    const tabs=document.createElement('div');tabs.className='xtw-hub-tabs';const tf=document.createElement('button');tf.type='button';tf.className='xtw-hub-tab';tf.dataset.hubTab='friends';tf.innerHTML='<i>窗</i><span>同窗</span>';const ts=document.createElement('button');ts.type='button';ts.className='xtw-hub-tab';ts.dataset.hubTab='shop';ts.innerHTML='<i>市</i><span>夜市商城</span>';tabs.append(tf,ts);p.appendChild(tabs);
+    const body=document.createElement('div');body.className='xtw-hub-body';p.appendChild(body);
+    const renderTab=async(tab)=>{
+      tabs.querySelectorAll('.xtw-hub-tab').forEach(x=>x.classList.toggle('on',x.dataset.hubTab===tab));body.replaceChildren();
+      if(tab==='shop'){
+        const gg=G(),cat=window.ShopSystem&&ShopSystem.catalog?ShopSystem.catalog():[],owned=cat.filter(i=>{try{return i.type==='permanent'?ShopSystem.hasPermanent(i.id):ShopSystem.stock(i.id)>0||ShopSystem.activeCount(i.id)>0;}catch(_){return false;}}).length;
+        const w=document.createElement('div');w.className='xtw-hub-wallet';w.append(hubStat('PEARLS · 珍珠',Math.max(0,Number(gg.pearls)||0)),hubStat('GONGWAN · 貢丸',Math.max(0,Number(gg.gongwan)||0)),hubStat('MY ITEMS · 道具',owned));body.appendChild(w);
+        const grid=document.createElement('div');grid.className='xtw-hub-grid';grid.append(hubAction('市','逛夜市商城','買道具、永久被動與魔龍戰用品。','shop','shop-action'),hubAction('物','我的道具','查看目前持有與已啟用的夜市道具。','shop-inventory','shop-action'),hubAction('籤','今日一抽','進入夜市後查看今日免費抽與加抽。','shop-gacha','shop-action'));body.appendChild(grid);
+        const note=document.createElement('div');note.className='xtw-hub-market-note';note.textContent='商城與同窗共用同一個入口；離開這個面板後，遊戲與好友資料仍全部保存在這台裝置。';body.appendChild(note);
+      }else{
+        const grid=document.createElement('div');grid.className='xtw-hub-grid';const a=hubAction('證','我的同窗證','顯示自己的 QR，讓朋友掃證相認。','pass');const b=hubAction('掃','掃證相認','只用 QR 加同窗，不提供陌生人搜尋。','scan');const c=hubAction('冊','同窗冊','查看好友進度、最高關卡與相遇紀錄。','book');const badge=document.createElement('span');badge.className='mini-count';badge.dataset.xtwFriendCount='';badge.textContent=String(friendN);c.appendChild(badge);grid.append(a,b,c);body.appendChild(grid);
+        const pr=pp.progress||{},cleared=Number(pr.cleared||0),total=Number(pr.total||0),pct=total?Math.max(0,Math.min(100,Math.round(cleared/total*100))):0;const prog=document.createElement('div');prog.className='xtw-hub-progress';const ph=document.createElement('div');ph.className='xtw-hub-progress-head';const l=document.createElement('span');l.innerHTML='<b>我的闖關進度</b>';const r=document.createElement('span');r.textContent=total?`${cleared} / ${total}`:'尚未同步';ph.append(l,r);const bar=document.createElement('div');bar.className='bar';const i=document.createElement('i');i.style.width=pct+'%';bar.appendChild(i);const next=document.createElement('span');next.className='small';next.textContent=progressLine(pr);prog.append(ph,bar,next);body.appendChild(prog);
+        const ft=document.createElement('div');ft.className='xtw-hub-footer';const bk=btn('本機備份','ghost','backup');bk.classList.add('sm');ft.appendChild(bk);body.appendChild(ft);
+      }
+    };
+    tabs.addEventListener('click',e=>{const b=e.target.closest('[data-hub-tab]');if(b)renderTab(b.dataset.hubTab);});await renderTab(initialTab);
   }
 
   function profileHtml(){
@@ -86748,16 +86771,71 @@ const XTWFriends = (()=>{
   }
   function btn(label,kind='ghost',act=''){const b=document.createElement('button');b.type='button';b.className=`btn ${kind}`;b.textContent=label;if(act)b.dataset.xfAct=act;return b;}
   async function openPass(){
-    const p=baseModal('Classmate pass · 同窗證','我的同窗證','讓對方掃這張 QR。這是一張本機名片，不會把資料上傳到伺服器。');
-    const stage=document.createElement('div');stage.className='xtw-pass';p.appendChild(stage);
-    const cv=document.createElement('canvas');cv.width=cv.height=900;cv.setAttribute('aria-label','我的同窗證 QR Code');stage.appendChild(cv);
-    const who=document.createElement('div');who.className='xtw-pass-person';const pp=publicProfile();const nm=document.createElement('b');nm.textContent=pp.name;const meta=document.createElement('span');meta.textContent=`Lv.${pp.level}${pp.title?' · '+pp.title:''}`;const prog=document.createElement('span');prog.className='xtw-pass-progress';prog.textContent=progressLine(pp.progress);who.append(nm,meta,prog);stage.appendChild(who);
-    const id=document.createElement('div');id.className='xtw-pass-id';id.textContent=ensureProfileId();stage.appendChild(id);
-    const note=document.createElement('p');note.className='xtw-pass-note';note.textContent='雙向同窗需要彼此各掃一次：你掃他、他再掃你。QR 可被截圖保存；完全無後端模式無法遠端撤銷已發出的證件。';stage.appendChild(note);
+    const p=baseModal('Classmate pass · 同窗證','我的同窗證','');
+    p.classList.add('xtw-pass-panel');
+    const oldK=p.querySelector('.xtw-friend-kicker'),oldH=p.querySelector('.xtw-friend-title'),oldS=p.querySelector('.xtw-friend-sub');
+    if(oldK)oldK.remove();if(oldH)oldH.remove();if(oldS)oldS.remove();
+
+    const pp=publicProfile(),pr=pp.progress||{};
+    const cleared=Math.max(0,Number(pr.cleared)||0),total=Math.max(0,Number(pr.total)||0);
+    const pct=total?Math.max(0,Math.min(100,Math.round(cleared/total*100))):0;
+    const highest=(pr.highest_id||pr.highest_zh)?`${pr.highest_id||''}${pr.highest_id&&pr.highest_zh?' · ':''}${pr.highest_zh||''}`:'尚未通關';
+    const next=total&&cleared>=total?'全線通關':((pr.next_id||pr.next_zh)?`${pr.next_id||''}${pr.next_id&&pr.next_zh?' · ':''}${pr.next_zh||''}`:'尚未同步');
+    const passId=ensureProfileId();
+    const issueKey='xtw_classmate_pass_issued_at_v1';
+    let issued=Number(localStorage.getItem(issueKey)||0);
+    if(!issued||!Number.isFinite(issued)){issued=Date.now();try{localStorage.setItem(issueKey,String(issued));}catch(_){}}
+    const date=new Date(issued),issuedText=`${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
+    const poster=pp.gender==='female'?'assets/profile-female-poster.jpg':pp.gender==='deity'?'assets/profile-deity-poster.webp':pp.gender==='male'?'assets/profile-male-poster.jpg':'';
+
+    const toolbar=document.createElement('div');toolbar.className='xtw-ticket-toolbar';
+    const modeLabel=document.createElement('span');modeLabel.className='xtw-ticket-toolbar-label';modeLabel.textContent='同窗證模式';
+    const modes=document.createElement('div');modes.className='xtw-ticket-modes';
+    const displayBtn=document.createElement('button');displayBtn.type='button';displayBtn.className='xtw-ticket-mode-btn on';displayBtn.dataset.passMode='display';displayBtn.textContent='展示模式';
+    const scanBtn=document.createElement('button');scanBtn.type='button';scanBtn.className='xtw-ticket-mode-btn';scanBtn.dataset.passMode='scan';scanBtn.textContent='掃描模式';
+    modes.append(displayBtn,scanBtn);toolbar.append(modeLabel,modes);p.appendChild(toolbar);
+
+    const stage=document.createElement('div');stage.className='xtw-pass xtw-ticket-stage';p.appendChild(stage);
+    const ticket=document.createElement('article');ticket.className='xtw-ticket';stage.appendChild(ticket);
+
+    const main=document.createElement('section');main.className='xtw-ticket-main';ticket.appendChild(main);
+    const brand=document.createElement('div');brand.className='xtw-ticket-brand';
+    const brandLeft=document.createElement('div');brandLeft.className='xtw-ticket-brand-left';
+    const seal=document.createElement('span');seal.className='xtw-ticket-brand-seal';seal.textContent='閒';
+    const brandCopy=document.createElement('div');const zh=document.createElement('b');zh.textContent='閒台文・同窗證';const en=document.createElement('span');en.textContent='TAI WAN WAY · CLASSMATE TICKET';brandCopy.append(zh,en);brandLeft.append(seal,brandCopy);
+    const serial=document.createElement('div');serial.className='xtw-ticket-serial';serial.innerHTML='<small>PASS NO.</small>';
+    const serialB=document.createElement('b');serialB.textContent=passId;serial.appendChild(serialB);brand.append(brandLeft,serial);main.appendChild(brand);
+
+    const identity=document.createElement('div');identity.className='xtw-ticket-identity';
+    const avatar=document.createElement('div');avatar.className='xtw-ticket-avatar';
+    if(poster){const img=document.createElement('img');img.src=poster;img.alt='';img.loading='eager';img.decoding='async';avatar.appendChild(img);}else{avatar.textContent=initial(pp.name);}
+    const person=document.createElement('div');person.className='xtw-ticket-person';const passenger=document.createElement('small');passenger.textContent='PASSENGER · 同窗';const name=document.createElement('h3');name.textContent=pp.name;const meta=document.createElement('div');meta.className='xtw-ticket-person-meta';meta.textContent=`Lv.${pp.level} · ${pp.title||'尚未取得稱號'}`;person.append(passenger,name,meta);identity.append(avatar,person);main.appendChild(identity);
+
+    const info=document.createElement('div');info.className='xtw-ticket-info';
+    const cell=(label,value,wide=false)=>{const d=document.createElement('div');d.className='xtw-ticket-cell'+(wide?' wide':'');const l=document.createElement('small');l.textContent=label;const v=document.createElement('b');v.textContent=value;d.append(l,v);return d;};
+    info.append(cell('LEVEL · 等級',`LV.${pp.level}`),cell('ISSUED · 發行日',issuedText),cell('HIGHEST · 最高已通關',highest,true),cell('NEXT STOP · 下一關',next,true));main.appendChild(info);
+
+    const progress=document.createElement('div');progress.className='xtw-ticket-progress';
+    const ph=document.createElement('div');ph.className='xtw-ticket-progress-head';const pl=document.createElement('span');pl.textContent='ROUTE PROGRESS · 闖關進度';const pv=document.createElement('b');pv.textContent=total?`${cleared} / ${total}`:'尚未同步';ph.append(pl,pv);
+    const track=document.createElement('div');track.className='xtw-ticket-progress-track';const fill=document.createElement('i');fill.style.width=pct+'%';track.appendChild(fill);progress.append(ph,track);main.appendChild(progress);
+
+    const stamp=document.createElement('div');stamp.className='xtw-ticket-stamp';stamp.innerHTML='<b>同窗</b><span>LOCAL PASS</span>';main.appendChild(stamp);
+
+    const stub=document.createElement('aside');stub.className='xtw-ticket-stub';ticket.appendChild(stub);
+    const stubTop=document.createElement('div');stubTop.className='xtw-ticket-stub-top';const stubK=document.createElement('span');stubK.textContent='SCAN TO MEET';const stubH=document.createElement('b');stubH.textContent='掃證相認';stubTop.append(stubK,stubH);stub.appendChild(stubTop);
+    const qrWrap=document.createElement('div');qrWrap.className='xtw-ticket-qr';const cv=document.createElement('canvas');cv.width=cv.height=900;cv.setAttribute('aria-label','我的同窗證 QR Code');qrWrap.appendChild(cv);stub.appendChild(qrWrap);
+    const stubId=document.createElement('div');stubId.className='xtw-ticket-stub-id';const sidL=document.createElement('small');sidL.textContent='COMPANION ID';const sidV=document.createElement('b');sidV.textContent=passId;stubId.append(sidL,sidV);stub.appendChild(stubId);
+    const hint=document.createElement('p');hint.className='xtw-ticket-scan-hint';hint.textContent='掃描後可查看等級、稱號與目前闖關進度。雙向加入需彼此各掃一次。';stub.appendChild(hint);
+
+    const foot=document.createElement('div');foot.className='xtw-ticket-footnote';foot.innerHTML='<span>LOCAL ONLY · 無後端同窗證</span><span>再次相遇可更新等級與關卡進度</span>';stage.appendChild(foot);
+
+    const setMode=(mode)=>{const scan=mode==='scan';p.classList.toggle('xtw-pass-scan-mode',scan);modes.querySelectorAll('[data-pass-mode]').forEach(b=>b.classList.toggle('on',b.dataset.passMode===mode));requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));};
+    modes.addEventListener('click',e=>{const b=e.target.closest('[data-pass-mode]');if(b)setMode(b.dataset.passMode);});
+
     try{
-      const text=await passText();const ctx=cv.getContext('2d');Share.drawQR(ctx,text,0,0,cv.width,'#1B211D','#FFFDF8',true);
+      const text=await passText();const ctx=cv.getContext('2d');Share.drawQR(ctx,text,0,0,cv.width,'#17231D','#FFFDF6',true);
       const secure=/^https?:/.test(text);
-      if(!secure){const w=document.createElement('div');w.className='xtw-inline-error';w.textContent='目前是本機檔案模式。這張 QR 可由支援站內掃描的瀏覽器讀取；部署到 HTTPS / GitHub Pages 後，iPhone 系統相機也能直接掃開閒台文。';stage.appendChild(w);}
+      if(!secure){const w=document.createElement('div');w.className='xtw-inline-error xtw-ticket-local-warning';w.textContent='目前是本機檔案模式；部署到 HTTPS / GitHub Pages 後，iPhone 系統相機即可直接掃開閒台文。';stage.appendChild(w);}
     }catch(err){const e=document.createElement('div');e.className='xtw-inline-error';e.textContent='同窗證產生失敗：'+humanError(err);stage.appendChild(e);}
   }
 
@@ -86845,9 +86923,9 @@ const XTWFriends = (()=>{
     const welcome=document.querySelector('#welcome:not([hidden])');if(welcome){setTimeout(consumeIncoming,650);return;}
     incomingBusy=true;try{const scan=await parseToken(token);cleanIncoming();showMeetConfirm(scan);}catch(err){cleanIncoming();showScanError(err);}finally{incomingBusy=false;}
   }
-  function onClick(e){const b=e.target.closest('[data-xf-act]');if(!b)return;const a=b.dataset.xfAct;if(a==='close')closeModal();else if(a==='shop'){closeModal();go('shop');}else if(a==='pass')openPass();else if(a==='scan')openScanner();else if(a==='book')openBook();else if(a==='backup')openBackup();}
+  function onClick(e){const b=e.target.closest('[data-xf-act]');if(!b)return;const a=b.dataset.xfAct;if(a==='close')closeModal();else if(a==='hub')openHub();else if(a==='shop'||a==='shop-inventory'||a==='shop-gacha'){closeModal();go('shop');if(a==='shop-inventory')setTimeout(()=>{const x=document.querySelector('[data-shop-inventory]');if(x)x.click();},260);else if(a==='shop-gacha')setTimeout(()=>{const x=document.querySelector('.gacha-panel,[data-gacha-panel]');if(x&&x.scrollIntoView)x.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'start'});},320);}else if(a==='pass')openPass();else if(a==='scan')openScanner();else if(a==='book')openBook();else if(a==='backup')openBackup();}
   function init(){if(!started){started=true;document.addEventListener('click',onClick);window.addEventListener('hashchange',()=>{if(modal)closeModal();},{passive:true});window.addEventListener('pagehide',()=>{if(modal)closeModal();},{passive:true});}if(document.body)ensureDock();else window.addEventListener('DOMContentLoaded',ensureDock,{once:true});openDB().then(()=>refreshCount()).catch(err=>console.warn('[同窗冊 DB]',err));consumeIncoming();}
-  return {init,profileHtml,mountProfile,openPass,openScanner,openBook,close:closeModal,isOpen:()=>!!modal};
+  return {init,profileHtml,mountProfile,openHub,openPass,openScanner,openBook,close:closeModal,isOpen:()=>!!modal};
 })();
 window.XTWFriends=XTWFriends;
 
