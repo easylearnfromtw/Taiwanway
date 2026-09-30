@@ -78700,7 +78700,7 @@ window.Soundscape = (() => {
 
   const mk = (src, loop=false) => { if(loop && window.LoopAudio && location.protocol!=='file:')return new window.LoopAudio.Track(P+src); const a=new Audio(P+src); a.preload=loop?'auto':'metadata'; a.loop=loop; a.playsInline=true; if(loop)a.autoplay=true; return a; };
   const sceneVol = (key) => ({library:.075,clinic:.085,home:.075,office:.09,coast:.12,nightmarket:.13,stadium:.12,concert:.11,ktv:.10}[key] || .105);
-  const musicVol = (key) => ({boss:.105, main:.075, night:.068, temple:.069, metro:.066, mountain:.072, midnight:.067}[key] || .072);
+  const musicVol = (key) => ({boss:.115, main:.115, night:.105, temple:.10, metro:.095, mountain:.10, midnight:.095}[key] || .10);
   const effectiveAmb = () => set.ambient && ambientRouteActive && !ducked ? .45*sceneVol(scene) : 0;
   const effectiveMusic = () => set.music ? musicVol(musicKey)*(ducked?.35:1) : 0;
 
@@ -78733,6 +78733,9 @@ window.Soundscape = (() => {
   function unlock(force=false){
     if(!force && !soundOptIn()) return false;
     unlocked=true;
+    // v1.10: if the first user gesture arrives before route() has created the music bed,
+    // create it immediately so BGM never silently misses the autoplay window.
+    if(set.music && !music) setMusic(musicKey||'main');
     if(ambientRouteActive && ambient){ if(ambient.paused) ambient.volume=0; safePlay(ambient); fadeTo(ambient,effectiveAmb(),550); }
     if(music){ if(music.paused) music.volume=0; safePlay(music); fadeTo(music,effectiveMusic(),700); }
     return true;
@@ -80776,7 +80779,6 @@ function vProfile() {
   <div class="sec-head"><div><div class="eyebrow">Profile · <span class="zh-font">我的</span></div><h1 class="h2" style="margin-top:8px">Profile & settings</h1></div><a class="btn ghost" href="#progress" data-act="go" data-to="progress">View progress ${I.arrow}</a></div>
   ${hasProfileCard ? profileIdCard() : ''}
   <div class="card prof-head rise">${profileCircleAvatarMarkup('pav')}<div class="profile-name-field"><div class="profile-name-label"><label for="pname">顯示名稱／證書姓名</label><span><b id="pname-count" class="num">${[...String(S.name||'')].length}</b>/6 字</span></div><input id="pname" type="text" maxlength="6" placeholder="最多 6 個字" value="${esc(S.name)}" autocomplete="nickname"><p class="small muted profile-name-help">${nameHelp}</p><p class="small muted profile-name-help-en">${nameHelpEn}</p><span class="small muted profile-level-line"><b class="serif-zh">${LEVELS[lv][1]}</b> · ${LEVELS[lv][2]} · ${S.xp} XP</span></div></div>
-  ${window.XTWFriends?XTWFriends.profileHtml():''}
   ${peaceIslandAdminProfileHtml()}
   ${window.TitleSystem?TitleSystem.collectionHtml():''}
   ${window.ClosedBeta?ClosedBeta.profileHtml():''}
@@ -81399,6 +81401,7 @@ function closeOverlays() {
   const pop = $('#langpop'); if (pop && !pop.hidden) { pop.hidden = true; $('#langbtn').setAttribute('aria-expanded', 'false'); }
   const ov = $('#search'); if (ov && !ov.hidden) { ov.hidden = true; }
   if (typeof Share !== 'undefined' && Share.isOpen()) Share.close();
+  try{if(window.XTWFriends&&XTWFriends.isOpen&&XTWFriends.isOpen())XTWFriends.close();}catch(_){}
 }
 document.addEventListener('pointerdown', (e) => {
   const pop = $('#langpop'); if (pop && !pop.hidden && !e.target.closest('#langpop') && !e.target.closest('#langbtn') && !e.target.closest('.m-lang')) { pop.hidden = true; }
@@ -82079,11 +82082,67 @@ const GachaSystem = (() => {
   function todayHistory(now=Date.now()){const {r}=record(),date=taipeiDateKey(now),h=r.history[date]||{total:0,items:[]};return {date,total:Number(h.total)||0,items:Array.isArray(h.items)?h.items.slice():[]};}
   function poolHtml(){return `<div class="gacha-pool">${POOL.map(x=>{const art=x.type==='item'?(window.TWW_ITEM_ART?.[x.itemId]||''):'';return `<div class="gacha-pool-row ${art?'has-art':''}"><span class="gacha-rarity">${esc(x.rarity)}</span><span class="gacha-pool-name">${art?`<img src="${art}" alt="" loading="lazy">`:''}<span>${esc(x.name)}</span></span><span class="gacha-rate">${RATE_TEXT[x.id]}</span></div>`}).join('')}<div class="gacha-total">每抽獨立判定；限定稱號已持有時，再次抽中會改發珍珠 ×50＋貢丸 ×10。</div></div>`;}
   function historyHtml(){const h=todayHistory();if(!h.items.length)return '<div class="gacha-history-empty">今天還沒有抽卡紀錄。</div>';return `<div class="gacha-history">${h.items.map(x=>{const p=POOL.find(r=>r.id===x.id),art=p&&p.type==='item'?(window.TWW_ITEM_ART?.[p.itemId]||''):'';return `<div class="gacha-history-row ${art?'has-art':''}"><span class="gacha-rarity">${esc(x.rarity)}</span><span class="gacha-pool-name">${art?`<img src="${art}" alt="" loading="lazy">`:''}<span>${esc(x.name)}</span></span><small>${x.free?'免費':'3珍珠'}</small></div>`}).join('')}</div><div class="gacha-total">今日已抽 ${h.total} 次 · 僅顯示最近 20 筆。</div>`;}
-  function panelHtml(){const st=status(),g=G(),missing=Math.max(0,PAID_COST-(Number(g.pearls)||0)),button=st.freeAvailable?'免費抽一次':st.canPaid?`再抽一次 · ${PAID_COST} 珍珠`:`還差 ${missing} 珍珠`;return `<section class="card daily-gacha" data-gacha-root><div class="gacha-head"><div><div class="gacha-kicker">DAILY DRAW · 夜市限定</div><h2 class="h3 serif-zh">今日一抽</h2><p class="small muted">每天免費一次，之後每抽固定 3 珍珠，付費抽不限次數。</p></div><span class="gacha-free-chip ${st.freeAvailable?'':'used'}">${st.freeAvailable?'今日免費抽可用':'今日免費抽已使用'}</span></div><div class="gacha-main"><div class="gacha-stage"><div class="gacha-card-back">抽</div><div class="gacha-copy"><b>${st.freeAvailable?'今天第一抽，夜市請客。':'想再試手氣？'}</b><p>${st.freeAvailable?'免費抽不消耗珍珠。':'加抽固定 3 珍珠，不受天降甘霖、戰後物價與夜市折扣影響。'}</p></div></div><div class="gacha-action"><button type="button" class="btn pri" data-gacha-draw ${!st.freeAvailable&&!st.canPaid?'disabled':''}>${button}</button><div class="gacha-price-note">每日 00:00（台灣時間）重置免費抽</div></div></div><div class="gacha-links"><details><summary>獎池詳情</summary>${poolHtml()}</details><details><summary>今日紀錄</summary>${historyHtml()}</details></div></section>`;}
-  function resultHtml(res){const extra=res.duplicateTitle?'重複稱號已轉為補償':res.luckyBonus?'「手氣不錯」觸發：額外 +1 珍珠':'',art=res.reward.type==='item'?(window.TWW_ITEM_ART?.[res.reward.itemId]||''):'';return `<div class="gacha-result-modal" role="dialog" aria-modal="true" aria-label="抽卡結果"><div class="gacha-result-shell">${res.reward.rarity==='UR'?'<div class="gacha-ur-burst"></div>':''}<section class="gacha-result-card" data-rarity="${esc(res.reward.rarity)}"><span class="gacha-result-rarity">${esc(res.reward.rarity)} · ${res.free?'FREE DRAW':'PAID DRAW'}</span><div class="gacha-result-icon ${art?'has-art':''}">${art?`<img src="${art}" alt="" decoding="async">`:esc(res.reward.icon||'抽')}</div><h2 class="h2 serif-zh">${esc(res.displayName)}</h2><p>${res.free?'今日免費抽完成。':`本次消耗 ${PAID_COST} 珍珠。`}</p>${extra?`<span class="gacha-result-extra">${esc(extra)}</span>`:''}<button type="button" class="btn pri" data-gacha-close>收下</button></section></div></div>`;}
+  function displayDate(now=Date.now()){try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'long',day:'numeric',weekday:'short'}).format(new Date(now));}catch(_){return taipeiDateKey(now);}}
+  function dailyNote(res){
+    const id=res?.reward?.id||'',rar=res?.reward?.rarity||'N';
+    const byItem={
+      taiwanPencil:'今天適合把想法寫下來。小事先記住，之後才不會漏掉。',
+      mrtDayPass:'今天適合多走一站、多看一點；探索本身就是收穫。',
+      breakfastMilkTea:'今天先照顧好節奏。吃飽、喝好，再慢慢把事情完成。',
+      blueWhiteSlippers:'今天不用太講究姿勢，舒服、穩定、走得久比較重要。',
+      templeCharm:'今天把注意力留給真正重要的事，其他雜訊先放一邊。',
+      emptyBetelBag:'有些東西看起來很台，真正值得留下的是背後的故事。',
+      nightMarketRing:'今天適合多試一次；不一定每圈都中，但會更接近。',
+      grandmaBento:'今天的好運比較像家常菜：不浮誇，但會讓人安心。',
+      goodLuckTitle:'今天的手氣很不尋常。收好就好，不必把所有運氣一次用完。'
+    };
+    if(byItem[id])return byItem[id];
+    if(rar==='SSR')return '今天的手氣很旺。留一點餘裕，讓好運有地方繼續發生。';
+    if(rar==='SR')return '今天容易遇到一個意外的小驚喜。看到時，記得接住。';
+    if(rar==='R')return '今天有一點順風。把它用在真正想推進的事情上。';
+    return '今天先把小事做好。穩穩完成，也是一種好手氣。';
+  }
+  function rarityLabel(r){return ({N:'日常',R:'好手氣',SR:'稀有',SSR:'大吉',UR:'極稀有'})[r]||r;}
+
+  function panelHtml(){
+    const st=status(),g=G(),h=todayHistory(),missing=Math.max(0,PAID_COST-(Number(g.pearls)||0));
+    const button=st.freeAvailable?'抽今天這一張':st.canPaid?`再抽一次 · ${PAID_COST} 珍珠`:`還差 ${missing} 珍珠`;
+    const lead=st.freeAvailable?'今天第一抽，夜市請客。先收下今天的手氣。':'今天的免費抽已完成；想再試一次也可以。';
+    const sub=st.freeAvailable?'免費抽不消耗珍珠，每天台灣時間 00:00 重置。':'加抽固定 3 珍珠；每次抽取仍獨立判定。';
+    return `<section class="card daily-gacha" data-gacha-root>
+      <div class="gacha-head"><div><div class="gacha-kicker">DAILY DRAW · 今日一抽</div><h2 class="h3 serif-zh">今天，抽一張台灣。</h2><p class="small muted">像每日開場一樣，先停一下，再看看今天會遇到什麼。</p></div><span class="gacha-free-chip ${st.freeAvailable?'':'used'}">${st.freeAvailable?'今日免費抽可用':'今日免費抽已使用'}</span></div>
+      <div class="gacha-ritual">
+        <div class="gacha-stage">
+          <div class="gacha-oracle-wrap"><div class="gacha-oracle-card" aria-hidden="true"><b>抽</b></div></div>
+          <div class="gacha-copy"><span class="gacha-date">${esc(displayDate())} · TAIPEI</span><b>${lead}</b><p>${sub}</p></div>
+        </div>
+        <aside class="gacha-guide"><span class="gacha-guide-label">今日手氣 · DAILY NOTE</span><strong>${st.freeAvailable?'先抽，再解讀。':'今天已經開過第一張。'}</strong><p>${st.freeAvailable?'不是算命，只是一個每天回來看看的小儀式。結果會直接進你的本機道具與珍珠紀錄。':'免費抽一天一次；之後仍可用珍珠繼續抽，今日紀錄會保留最近 20 筆。'}</p><div class="gacha-daily-facts"><span><small>Today</small><b>${h.total} 抽</b></span><span><small>Pearls</small><b>${Math.max(0,Math.floor(Number(g.pearls)||0))}</b></span></div><div class="gacha-action"><button type="button" class="btn pri" data-gacha-draw ${!st.freeAvailable&&!st.canPaid?'disabled':''}>${button}</button><div class="gacha-price-note">每日 00:00（台灣時間）重置免費抽</div></div></aside>
+      </div>
+      <div class="gacha-links"><details><summary>獎池詳情</summary>${poolHtml()}</details><details><summary>今日紀錄</summary>${historyHtml()}</details></div>
+    </section>`;
+  }
+  function resultHtml(res){
+    const extra=res.duplicateTitle?'重複稱號已轉為補償':res.luckyBonus?'「手氣不錯」觸發：額外 +1 珍珠':'',art=res.reward.type==='item'?(window.TWW_ITEM_ART?.[res.reward.itemId]||''):'',h=todayHistory(),st=status();
+    const cost=res.free?'免費':`${PAID_COST} 珍珠`,note=dailyNote(res),again=st.canPaid?`<button type="button" class="btn ghost" data-gacha-redraw>再抽一次 · ${PAID_COST} 珍珠</button>`:'';
+    return `<div class="gacha-result-modal" role="dialog" aria-modal="true" aria-label="今日一抽結果"><div class="gacha-result-shell">${res.reward.rarity==='UR'?'<div class="gacha-ur-burst"></div>':''}<section class="gacha-result-card" data-rarity="${esc(res.reward.rarity)}"><div class="gacha-result-top"><span class="gacha-result-rarity">${esc(res.reward.rarity)} · ${res.free?'FREE DRAW':'PAID DRAW'}</span><div class="gacha-result-icon ${art?'has-art':''}">${art?`<img src="${art}" alt="" decoding="async">`:esc(res.reward.icon||'抽')}</div><h2 class="h2 serif-zh">${esc(res.displayName)}</h2><p class="gacha-result-lede">${res.free?'今日免費抽完成。這張已經收進你的本機紀錄。':`本次消耗 ${PAID_COST} 珍珠，獎勵已立即入帳。`}</p>${extra?`<span class="gacha-result-extra">${esc(extra)}</span>`:''}</div><div class="gacha-result-facts"><div><span>手氣</span><strong>${esc(rarityLabel(res.reward.rarity))}</strong></div><div><span>今日紀錄</span><strong>第 ${h.total} 抽</strong></div><div><span>本次費用</span><strong>${esc(cost)}</strong></div></div><div class="gacha-result-note"><span>今日一句 · XIÁN TÁI WÉN NOTE</span><strong>${esc(note)}</strong></div><div class="gacha-result-actions">${again}<button type="button" class="btn pri" data-gacha-close>收下</button></div></section></div></div>`;
+  }
   function showResult(res){document.querySelectorAll('.gacha-result-modal').forEach(n=>n.remove());const wrap=document.createElement('div');wrap.innerHTML=resultHtml(res);const el=wrap.firstElementChild;if(!el)return;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));if(res.reward.rarity==='UR'){try{FX.burst(innerWidth/2,innerHeight*.42,88,{small:1,spread:9});}catch(_){}}}
   function refresh(){try{if(window.ShopSystem&&ShopSystem.refreshUI)ShopSystem.refreshUI();}catch(_){} }
-  document.addEventListener('click',e=>{const drawBtn=e.target.closest('[data-gacha-draw]');if(drawBtn){if(drawBtn.disabled)return;drawBtn.disabled=true;const res=draw({});if(!res.ok){toast(`珍珠不足：還差 ${Math.max(0,PAID_COST-(Number(G().pearls)||0))} 珍珠`);drawBtn.disabled=false;return;}refresh();showResult(res);return;}const close=e.target.closest('[data-gacha-close]');if(close){const el=close.closest('.gacha-result-modal');if(el){el.classList.remove('in');setTimeout(()=>el.remove(),180);}}});
+  function runDraw(btn){
+    if(btn&&btn.disabled)return;
+    const root=btn&&btn.closest('[data-gacha-root]');
+    if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='手氣形成中…';}
+    if(root)root.classList.add('is-drawing');
+    try{window.Soundscape&&Soundscape.sfx&&Soundscape.sfx('card',.16);}catch(_){}
+    const res=draw({});
+    if(!res.ok){if(root)root.classList.remove('is-drawing');if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'再抽一次';}toast(`珍珠不足：還差 ${Math.max(0,PAID_COST-(Number(G().pearls)||0))} 珍珠`);return;}
+    setTimeout(()=>{if(root)root.classList.remove('is-drawing');refresh();showResult(res);},REDUCE?40:820);
+  }
+  document.addEventListener('click',e=>{
+    const drawBtn=e.target.closest('[data-gacha-draw]');if(drawBtn){runDraw(drawBtn);return;}
+    const redraw=e.target.closest('[data-gacha-redraw]');if(redraw){const el=redraw.closest('.gacha-result-modal');if(el){el.classList.remove('in');setTimeout(()=>el.remove(),160);}setTimeout(()=>runDraw(null),REDUCE?0:180);return;}
+    const close=e.target.closest('[data-gacha-close]');if(close){const el=close.closest('.gacha-result-modal');if(el){el.classList.remove('in');setTimeout(()=>el.remove(),180);}}
+  });
   return {pool,poolTotal,taipeiDateKey,status,pick,draw,todayHistory,panelHtml,poolHtml,historyHtml,resultHtml,refresh,PAID_COST,TITLE_ID};
 })();
 window.GachaSystem=GachaSystem;
@@ -84558,7 +84617,7 @@ const certPreviewJpg=()=>window.XTW_ASSET('xtw-asset-cert-preview');
       </div>
     </section>
     ${s.dragonWon ? (s.certificate.graduate ? `<section class="sec"><div class="cert-grid">${certHtml('graduate', '結業證書', '討伐結業魔龍，完成閒台文闖關學院', '#7E2A26')}</div></section>` : certClaimBlock('graduate')) : ''}
-    ${dragonGuideHtml()}
+    ${s.dragonWon ? '' : dragonGuideHtml()}
     ${foot()}</div>`;
   }
 
@@ -86493,14 +86552,15 @@ const XTWFriends = (()=>{
   'use strict';
   const DB_NAME='xiantaiwen-classmates-v1', DB_VERSION=1;
   const BACKUP_FORMAT='xiantaiwen-local-backup', BACKUP_VERSION=1;
-  const QR_VERSION=1, MAX_TOKEN=4096, RESCAN_GUARD=30000;
+  const QR_VERSION=2, MAX_TOKEN=4096, RESCAN_GUARD=30000;
   const LS_ALLOW=/^(?:xiantaiwen|zhen-taiwan|xtw-)/i;
-  let dbPromise=null, started=false, incomingBusy=false, modal=null, scanStream=null, scanRaf=0, scanBusy=false;
+  let dbPromise=null, started=false, incomingBusy=false, modal=null, scanStream=null, scanRaf=0, scanBusy=false, dock=null;
 
   const now=()=>Date.now();
   const clip=(v,n)=>[...String(v??'')].slice(0,n).join('');
   const safeName=(v)=>clip(String(v??'').replace(/[\u0000-\u001F\u007F]/g,'').trim(),12);
   const safeTitle=(v)=>clip(String(v??'').replace(/[\u0000-\u001F\u007F]/g,'').trim(),32);
+  const safeStage=(v)=>clip(String(v??'').replace(/[\u0000-\u001F\u007F]/g,'').trim(),28);
   const gender=(v)=>['male','female','deity','none'].includes(v)?v:'none';
   const initial=(name)=>{const a=[...String(name||'我').trim()];return (a[0]||'我').toUpperCase();};
   const fmt=(t)=>{if(!t)return '—';try{return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(t));}catch(_){return String(t)}};
@@ -86543,8 +86603,30 @@ const XTWFriends = (()=>{
   async function countFriends(){const db=await openDB(),tx=db.transaction('friends','readonly'),n=await reqP(tx.objectStore('friends').count());await txP(tx);return n||0;}
 
   function currentTitle(){try{return safeTitle(window.TitleSystem&&TitleSystem.current?TitleSystem.current().zh:'');}catch(_){return ''}}
+  function publicProgress(){
+    try{
+      const g=G(), stages=Array.isArray(GAME&&GAME.stages)?GAME.stages:[];
+      const cleared=stages.filter(st=>g&&g.cleared&&g.cleared[st.id]);
+      const highest=cleared.length?cleared[cleared.length-1]:null;
+      const next=stages.find(st=>!(g&&g.cleared&&g.cleared[st.id]))||null;
+      return {
+        cleared:Math.max(0,Math.min(stages.length,cleared.length)),
+        total:Math.max(0,stages.length),
+        highest_id:highest?clip(highest.id,12):'',
+        highest_zh:highest?safeStage(highest.zh):'',
+        next_id:next?clip(next.id,12):'',
+        next_zh:next?safeStage(next.zh):''
+      };
+    }catch(_){return {cleared:0,total:0,highest_id:'',highest_zh:'',next_id:'',next_zh:''};}
+  }
   function publicProfile(){
-    return {friend_id:ensureProfileId(),name:safeName(S.name)||'學習者',gender:gender(S.gender),level:Math.max(1,Math.min(99,Number(level())+1||1)),title:currentTitle()};
+    return {friend_id:ensureProfileId(),name:safeName(S.name)||'學習者',gender:gender(S.gender),level:Math.max(1,Math.min(99,Number(level())+1||1)),title:currentTitle(),progress:publicProgress()};
+  }
+  function progressLine(x){
+    const c=Math.max(0,Number(x&&x.cleared)||0),o=Math.max(0,Number(x&&x.total)||0),nid=safeStage(x&&x.next_id),nzh=safeStage(x&&x.next_zh);
+    if(o&&c>=o)return `全部通關 · ${c}/${o}`;
+    if(nid||nzh)return `目前到 ${nid||''}${nid&&nzh?' · ':''}${nzh||''}`;
+    return o?`已通關 ${c}/${o}`:'尚未同步關卡進度';
   }
 
   async function cryptoIdentity(){
@@ -86555,8 +86637,11 @@ const XTWFriends = (()=>{
     rec={key:'crypto_identity',created_at:now(),public_jwk:await crypto.subtle.exportKey('jwk',kp.publicKey),private_jwk:await crypto.subtle.exportKey('jwk',kp.privateKey)};
     await putOne('meta',rec);return rec;
   }
-  function signedCore(profile,pk){return {v:QR_VERSION,i:profile.friend_id,n:profile.name,g:profile.gender,l:profile.level,t:profile.title,ts:now(),k:pk?{x:pk.x,y:pk.y}:null};}
-  function coreFromPayload(p){return {v:p.v,i:p.i,n:p.n,g:p.g,l:p.l,t:p.t,ts:p.ts,k:p.k?{x:p.k.x,y:p.k.y}:null};}
+  function signedCore(profile,pk){const pr=profile.progress||{};return {v:QR_VERSION,i:profile.friend_id,n:profile.name,g:profile.gender,l:profile.level,t:profile.title,c:Number(pr.cleared)||0,o:Number(pr.total)||0,a:pr.highest_id||'',z:pr.highest_zh||'',q:pr.next_id||'',r:pr.next_zh||'',ts:now(),k:pk?{x:pk.x,y:pk.y}:null};}
+  function coreFromPayload(p){
+    if(Number(p.v)===1)return {v:1,i:p.i,n:p.n,g:p.g,l:p.l,t:p.t,ts:p.ts,k:p.k?{x:p.k.x,y:p.k.y}:null};
+    return {v:p.v,i:p.i,n:p.n,g:p.g,l:p.l,t:p.t,c:p.c,o:p.o,a:p.a,z:p.z,q:p.q,r:p.r,ts:p.ts,k:p.k?{x:p.k.x,y:p.k.y}:null};
+  }
   async function fingerprint(k){if(!k||!k.x||!k.y||!(window.crypto&&crypto.subtle))return '';const b=new TextEncoder().encode(JSON.stringify({x:k.x,y:k.y}));return bytesToB64u(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).slice(0,22);}
   async function makePayload(){
     const p=publicProfile();let ci=null;
@@ -86571,12 +86656,18 @@ const XTWFriends = (()=>{
   }
   function validatePayload(p){
     if(!p||typeof p!=='object'||Array.isArray(p))throw new Error('BAD_QR');
-    const keys=Object.keys(p);if(keys.some(k=>!['v','i','n','g','l','t','ts','k','s'].includes(k)))throw new Error('BAD_QR');
-    if(p.v!==QR_VERSION)throw new Error('QR_VERSION');
+    const keys=Object.keys(p);if(keys.some(k=>!['v','i','n','g','l','t','c','o','a','z','q','r','ts','k','s'].includes(k)))throw new Error('BAD_QR');
+    p.v=Number(p.v);if(![1,2].includes(p.v))throw new Error('QR_VERSION');
     if(!/^TW-[A-Z2-9]{6}$/.test(String(p.i||'')))throw new Error('BAD_ID');
     p.n=safeName(p.n);if(!p.n)throw new Error('BAD_NAME');
     p.g=gender(p.g);p.l=Number(p.l);if(!Number.isInteger(p.l)||p.l<1||p.l>99)throw new Error('BAD_LEVEL');
-    p.t=safeTitle(p.t);p.ts=Number(p.ts);if(!Number.isFinite(p.ts)||p.ts<1577836800000||p.ts>now()+864e5)throw new Error('BAD_TIME');
+    p.t=safeTitle(p.t);
+    if(p.v>=2){
+      p.c=Number(p.c||0);p.o=Number(p.o||0);if(!Number.isInteger(p.c)||!Number.isInteger(p.o)||p.c<0||p.o<0||p.o>500||p.c>p.o)throw new Error('BAD_PROGRESS');
+      p.a=clip(p.a||'',12);p.z=safeStage(p.z||'');p.q=clip(p.q||'',12);p.r=safeStage(p.r||'');
+      if((p.a&&!/^[A-Za-z0-9._-]{1,12}$/.test(p.a))||(p.q&&!/^[A-Za-z0-9._-]{1,12}$/.test(p.q)))throw new Error('BAD_PROGRESS');
+    }else{p.c=0;p.o=0;p.a='';p.z='';p.q='';p.r='';}
+    p.ts=Number(p.ts);if(!Number.isFinite(p.ts)||p.ts<1577836800000||p.ts>now()+864e5)throw new Error('BAD_TIME');
     if(p.k!==null&&p.k!==undefined){if(typeof p.k!=='object'||typeof p.k.x!=='string'||typeof p.k.y!=='string'||p.k.x.length>100||p.k.y.length>100)throw new Error('BAD_KEY');}
     if(p.s!==null&&p.s!==undefined&&(typeof p.s!=='string'||p.s.length>180))throw new Error('BAD_SIG');
     return p;
@@ -86607,14 +86698,43 @@ const XTWFriends = (()=>{
     return 'XTW1:'+token;
   }
 
+  function ensureDock(){
+    if(dock&&dock.isConnected)return dock;
+    const d=document.createElement('aside');
+    d.id='xtw-friend-dock';
+    d.className='xtw-friend-dock';
+    d.setAttribute('aria-label','同窗快捷功能');
+    const makeDockButton=(act,glyph,label,aria,extraClass='')=>{
+      const b=document.createElement('button');
+      b.type='button';b.className=`xtw-friend-dock-btn${extraClass?' '+extraClass:''}`;b.dataset.xfAct=act;b.setAttribute('aria-label',aria);b.title=aria;
+      const g=document.createElement('span');g.className='xtw-friend-dock-glyph';g.textContent=glyph;
+      const l=document.createElement('span');l.className='xtw-friend-dock-label';l.textContent=label;
+      b.append(g,l);
+      if(act==='book'){
+        const c=document.createElement('span');c.className='xtw-friend-dock-count num';c.dataset.xtwFriendCount='';c.textContent='…';b.appendChild(c);
+      }
+      return b;
+    };
+    // 商城獨立放在同窗快捷列上方；好友功能維持在下一層。
+    d.appendChild(makeDockButton('shop','市','商城','打開商城','xtw-friend-dock-shop'));
+    const row=document.createElement('div');row.className='xtw-friend-dock-row';
+    [
+      ['pass','證','同窗證','顯示我的同窗證'],
+      ['scan','掃','掃證','掃證相認'],
+      ['book','冊','同窗冊','打開同窗冊']
+    ].forEach(def=>row.appendChild(makeDockButton(...def)));
+    d.appendChild(row);
+    document.body.appendChild(d);dock=d;refreshCount().catch(()=>{});return d;
+  }
+
   function profileHtml(){
     return `<section class="card xtw-classmates rise" aria-label="同窗"><div class="xtw-classmates-head"><div class="xtw-classmates-copy"><div class="eyebrow">Classmates · <span class="zh-font">同窗</span></div><h2 class="h3 serif-zh">同窗冊</h2><p>不建立帳號、不搜尋陌生人。只有交換 QR「同窗證」才能加入；好友、相遇紀錄與備份都留在這台裝置。</p></div><div class="xtw-classmates-count"><b class="num" data-xtw-friend-count>…</b><span>位同窗</span></div></div><div class="xtw-classmates-actions"><button type="button" class="xtw-classmate-action" data-xf-act="pass"><b>我的同窗證</b><span>顯示自己的 QR，讓對方掃證。</span></button><button type="button" class="xtw-classmate-action" data-xf-act="scan"><b>掃證相認</b><span>掃描對方 QR；沒有 ID 搜尋入口。</span></button><button type="button" class="xtw-classmate-action" data-xf-act="book"><b>打開同窗冊</b><span>查看初遇、最近相遇與相遇次數。</span></button></div><div class="xtw-classmates-foot"><i class="xtw-local-dot"></i><span>Local only · IndexedDB</span><span>·</span><button type="button" class="chip-btn" data-xf-act="backup">本機存檔／備份</button></div></section>`;
   }
   async function mountProfile(app){try{const el=app.querySelector('[data-xtw-friend-count]');if(el)el.textContent=String(await countFriends());}catch(_){const el=app.querySelector('[data-xtw-friend-count]');if(el)el.textContent='—';}}
   async function refreshCount(){const n=await countFriends().catch(()=>0);$$('[data-xtw-friend-count]').forEach(el=>el.textContent=String(n));}
 
-  function lock(){document.documentElement.classList.add('xw-modal-open');document.body.style.setProperty('overflow','hidden','important');}
-  function unlock(){document.documentElement.classList.remove('xw-modal-open');document.body.style.removeProperty('overflow');}
+  function lock(){document.documentElement.classList.add('xtw-friend-lock');}
+  function unlock(){document.documentElement.classList.remove('xtw-friend-lock');}
   function stopScan(){if(scanRaf)cancelAnimationFrame(scanRaf);scanRaf=0;scanBusy=false;if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}}
   function closeModal(){stopScan();if(modal){modal.remove();modal=null;}unlock();}
   function baseModal(kicker,title,sub){
@@ -86627,18 +86747,16 @@ const XTWFriends = (()=>{
     ov.appendChild(p);document.body.appendChild(ov);modal=ov;ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});return p;
   }
   function btn(label,kind='ghost',act=''){const b=document.createElement('button');b.type='button';b.className=`btn ${kind}`;b.textContent=label;if(act)b.dataset.xfAct=act;return b;}
-  function verifyBadge(verified){const d=document.createElement('span');d.className='xtw-verify '+(verified?'ok':'warn');d.textContent=verified?'✓ 本機簽章已驗證':'△ 未驗證簽章';return d;}
-
   async function openPass(){
     const p=baseModal('Classmate pass · 同窗證','我的同窗證','讓對方掃這張 QR。這是一張本機名片，不會把資料上傳到伺服器。');
     const stage=document.createElement('div');stage.className='xtw-pass';p.appendChild(stage);
     const cv=document.createElement('canvas');cv.width=cv.height=900;cv.setAttribute('aria-label','我的同窗證 QR Code');stage.appendChild(cv);
-    const who=document.createElement('div');who.className='xtw-pass-person';const nm=document.createElement('b');nm.textContent=publicProfile().name;const meta=document.createElement('span');const pp=publicProfile();meta.textContent=`Lv.${pp.level}${pp.title?' · '+pp.title:''}`;who.append(nm,meta);stage.appendChild(who);
+    const who=document.createElement('div');who.className='xtw-pass-person';const pp=publicProfile();const nm=document.createElement('b');nm.textContent=pp.name;const meta=document.createElement('span');meta.textContent=`Lv.${pp.level}${pp.title?' · '+pp.title:''}`;const prog=document.createElement('span');prog.className='xtw-pass-progress';prog.textContent=progressLine(pp.progress);who.append(nm,meta,prog);stage.appendChild(who);
     const id=document.createElement('div');id.className='xtw-pass-id';id.textContent=ensureProfileId();stage.appendChild(id);
     const note=document.createElement('p');note.className='xtw-pass-note';note.textContent='雙向同窗需要彼此各掃一次：你掃他、他再掃你。QR 可被截圖保存；完全無後端模式無法遠端撤銷已發出的證件。';stage.appendChild(note);
     try{
       const text=await passText();const ctx=cv.getContext('2d');Share.drawQR(ctx,text,0,0,cv.width,'#1B211D','#FFFDF8',true);
-      const secure=/^https?:/.test(text);const vb=verifyBadge(!!(window.crypto&&crypto.subtle));stage.appendChild(vb);
+      const secure=/^https?:/.test(text);
       if(!secure){const w=document.createElement('div');w.className='xtw-inline-error';w.textContent='目前是本機檔案模式。這張 QR 可由支援站內掃描的瀏覽器讀取；部署到 HTTPS / GitHub Pages 後，iPhone 系統相機也能直接掃開閒台文。';stage.appendChild(w);}
     }catch(err){const e=document.createElement('div');e.className='xtw-inline-error';e.textContent='同窗證產生失敗：'+humanError(err);stage.appendChild(e);}
   }
@@ -86668,6 +86786,7 @@ const XTWFriends = (()=>{
     const counted=!(old&&t-Number(old.last_met_at||0)<RESCAN_GUARD);
     const rec={
       friend_id:p.i,name:p.n,gender:p.g,level:p.l,current_title:p.t||'',joined_title:old?old.joined_title:(p.t||''),
+      progress_cleared:Number(p.c||0),progress_total:Number(p.o||0),highest_stage_id:p.a||'',highest_stage_zh:p.z||'',next_stage_id:p.q||'',next_stage_zh:p.r||'',
       first_met_at:old?old.first_met_at:t,last_met_at:t,encounter_count:old?(Number(old.encounter_count)||1)+(counted?1:0):1,
       verified:!!scan.verified,key_fp:scan.key_fp||(old&&old.key_fp)||'',public_key:p.k||(old&&old.public_key)||null,updated_at:t
     };
@@ -86675,18 +86794,30 @@ const XTWFriends = (()=>{
   }
   async function processScanned(raw){try{const scan=await parseToken(tokenFromScanned(raw));showMeetConfirm(scan);}catch(err){showScanError(err);}}
   function showScanError(err){const p=baseModal('QR check · 同窗證驗證','這張不是可用的同窗證','沒有加入任何資料。');const e=document.createElement('div');e.className='xtw-inline-error';e.textContent=humanError(err);p.appendChild(e);const a=document.createElement('div');a.className='xtw-friend-actions';a.appendChild(btn('重新掃描','pri','scan'));p.appendChild(a);}
+  function appendFriendProgress(host,src){
+    const box=document.createElement('div');box.className='xtw-progress-card';
+    const c=Math.max(0,Number(src&&src.c)||Number(src&&src.progress_cleared)||0),o=Math.max(0,Number(src&&src.o)||Number(src&&src.progress_total)||0);
+    const hid=safeStage((src&&src.a)||(src&&src.highest_stage_id)||''),hzh=safeStage((src&&src.z)||(src&&src.highest_stage_zh)||'');
+    const nid=safeStage((src&&src.q)||(src&&src.next_stage_id)||''),nzh=safeStage((src&&src.r)||(src&&src.next_stage_zh)||'');
+    const top=document.createElement('div');top.className='xtw-progress-head';const lab=document.createElement('b');lab.textContent='闖關進度';const count=document.createElement('span');count.textContent=o?`${c} / ${o}`:'尚未同步';top.append(lab,count);box.appendChild(top);
+    if(o){const track=document.createElement('div');track.className='xtw-progress-track';const fill=document.createElement('i');fill.style.width=`${Math.max(0,Math.min(100,o?c/o*100:0))}%`;track.appendChild(fill);box.appendChild(track);}
+    const lines=document.createElement('div');lines.className='xtw-progress-lines';
+    const cur=document.createElement('span');cur.textContent=o&&c>=o?'✓ 全部關卡已通關':`目前：${nid||'—'}${nid&&nzh?' · ':''}${nzh||'尚未同步'}`;
+    const hi=document.createElement('span');hi.textContent=`最高已通關：${hid||'—'}${hid&&hzh?' · ':''}${hzh|| (c?'已完成':'尚未通關')}`;
+    lines.append(cur,hi);box.appendChild(lines);host.appendChild(box);
+  }
   function showMeetConfirm(scan){
-    const p=baseModal('You met · 相逢','你遇見了一位同窗','確認後才會寫入這台裝置的同窗冊。');const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(scan.payload.n);const cp=document.createElement('div');cp.className='xtw-meet-copy';const nm=document.createElement('b');nm.textContent=scan.payload.n;const meta=document.createElement('span');meta.textContent=`Lv.${scan.payload.l}${scan.payload.t?' · '+scan.payload.t:''}`;cp.append(nm,meta,verifyBadge(scan.verified));c.append(av,cp);p.appendChild(c);
-    const note=document.createElement('p');note.className='xtw-friend-sub';note.textContent='本機簽章只能確認「這份證件由同一把本機私鑰簽出」，不能證明對方的真實姓名或現實身份。';p.appendChild(note);
+    const p=baseModal('You met · 相逢','你遇見了一位同窗','確認後才會寫入這台裝置的同窗冊。');const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(scan.payload.n);const cp=document.createElement('div');cp.className='xtw-meet-copy';const nm=document.createElement('b');nm.textContent=scan.payload.n;const meta=document.createElement('span');meta.textContent=`Lv.${scan.payload.l}${scan.payload.t?' · '+scan.payload.t:''}`;cp.append(nm,meta);c.append(av,cp);p.appendChild(c);
+    appendFriendProgress(p,scan.payload);
     const acts=document.createElement('div');acts.className='xtw-friend-actions';const accept=btn('結為同窗','pri');accept.addEventListener('click',async()=>{accept.disabled=true;try{const r=await upsertFriend(scan);showAccepted(r);}catch(err){showScanError(err);}});acts.append(accept,btn('取消','ghost','close'));p.appendChild(acts);
   }
-  function showAccepted(result){const {rec,isNew,counted}=result;const p=baseModal('Classmate saved · 同窗冊','從此便是同窗。',isNew?'已把對方的同窗證收進這台裝置。':counted?'已更新資料，並記下一次新的相遇。':'剛剛已掃過同一張證件；資料已更新，但不重複計算相遇次數。');const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(rec.name);const cp=document.createElement('div');cp.className='xtw-meet-copy';const nm=document.createElement('b');nm.textContent=rec.name;const meta=document.createElement('span');meta.textContent=`相遇 ${rec.encounter_count} 次 · 最近 ${fmt(rec.last_met_at)}`;cp.append(nm,meta);c.append(av,cp);p.appendChild(c);const n=document.createElement('div');n.className='xtw-scan-help';n.textContent='這是無後端的雙向交換：目前只是「你有他」。要讓對方的同窗冊也有你，請讓對方再掃一次你的「同窗證」。';p.appendChild(n);const a=document.createElement('div');a.className='xtw-friend-actions';a.append(btn('顯示我的同窗證','pri','pass'),btn('打開同窗冊','ghost','book'));p.appendChild(a);}
+  function showAccepted(result){const {rec,isNew,counted}=result;const p=baseModal('Classmate saved · 同窗冊','從此便是同窗。',isNew?'已把對方的同窗證收進這台裝置。':counted?'已更新資料，並記下一次新的相遇。':'剛剛已掃過同一張證件；資料已更新，但不重複計算相遇次數。');const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(rec.name);const cp=document.createElement('div');cp.className='xtw-meet-copy';const nm=document.createElement('b');nm.textContent=rec.name;const meta=document.createElement('span');meta.textContent=`相遇 ${rec.encounter_count} 次 · 最近 ${fmt(rec.last_met_at)}`;cp.append(nm,meta);c.append(av,cp);p.appendChild(c);appendFriendProgress(p,rec);const n=document.createElement('div');n.className='xtw-scan-help';n.textContent='這是無後端的雙向交換：目前只是「你有他」。要讓對方的同窗冊也有你，請讓對方再掃一次你的「同窗證」。';p.appendChild(n);const a=document.createElement('div');a.className='xtw-friend-actions';a.append(btn('顯示我的同窗證','pri','pass'),btn('打開同窗冊','ghost','book'));p.appendChild(a);}
 
   async function openBook(){
-    const p=baseModal('Classmate book · 同窗冊','我的同窗冊','依最近相遇排序；再次掃到同一位同窗會更新人物資料並增加相遇紀錄。');const tools=document.createElement('div');tools.className='xtw-book-tools';const cnt=document.createElement('span');cnt.className='small muted';tools.appendChild(cnt);const rescan=btn('掃證相認','ghost','scan');rescan.classList.add('sm');tools.appendChild(rescan);p.appendChild(tools);const list=document.createElement('div');list.className='xtw-book-list';p.appendChild(list);
-    try{const friends=(await getAll('friends')).sort((a,b)=>Number(b.last_met_at||0)-Number(a.last_met_at||0));cnt.textContent=`${friends.length} 位同窗`;if(!friends.length){const e=document.createElement('div');e.className='xtw-book-empty';e.textContent='同窗冊還是空的。和朋友交換「同窗證」後，第一張人物卡會出現在這裡。';list.appendChild(e);return;}friends.forEach(f=>{const row=document.createElement('button');row.type='button';row.className='xtw-book-row';const av=document.createElement('span');av.className='xtw-book-avatar';av.textContent=initial(f.name);const m=document.createElement('span');m.className='xtw-book-main';const b=document.createElement('b');b.textContent=f.name;const s=document.createElement('span');s.textContent=`Lv.${f.level}${f.current_title?' · '+f.current_title:''} · ${fmt(f.last_met_at)}`;m.append(b,s);const meet=document.createElement('span');meet.className='xtw-book-meets';meet.textContent=`× ${f.encounter_count||1}`;row.append(av,m,meet);row.addEventListener('click',()=>openFriendDetail(f.friend_id));list.appendChild(row);});}catch(err){const e=document.createElement('div');e.className='xtw-inline-error';e.textContent='同窗冊讀取失敗：'+humanError(err);list.appendChild(e);}
+    const p=baseModal('Classmate book · 同窗冊','我的同窗冊','依最近相遇排序；再次掃到同一位同窗會更新人物資料並增加相遇紀錄。');const tools=document.createElement('div');tools.className='xtw-book-tools';const cnt=document.createElement('span');cnt.className='small muted';tools.appendChild(cnt);const rescan=btn('掃證相認','ghost','scan');rescan.classList.add('sm');const backup=btn('本機備份','ghost','backup');backup.classList.add('sm');tools.append(rescan,backup);p.appendChild(tools);const list=document.createElement('div');list.className='xtw-book-list';p.appendChild(list);
+    try{const friends=(await getAll('friends')).sort((a,b)=>Number(b.last_met_at||0)-Number(a.last_met_at||0));cnt.textContent=`${friends.length} 位同窗`;if(!friends.length){const e=document.createElement('div');e.className='xtw-book-empty';e.textContent='同窗冊還是空的。和朋友交換「同窗證」後，第一張人物卡會出現在這裡。';list.appendChild(e);return;}friends.forEach(f=>{const row=document.createElement('button');row.type='button';row.className='xtw-book-row';const av=document.createElement('span');av.className='xtw-book-avatar';av.textContent=initial(f.name);const m=document.createElement('span');m.className='xtw-book-main';const b=document.createElement('b');b.textContent=f.name;const s=document.createElement('span');const pc=Number(f.progress_cleared||0),pt=Number(f.progress_total||0);s.textContent=`Lv.${f.level}${f.current_title?' · '+f.current_title:''}${pt?' · 通關 '+pc+'/'+pt:''} · ${fmt(f.last_met_at)}`;m.append(b,s);const meet=document.createElement('span');meet.className='xtw-book-meets';meet.textContent=`× ${f.encounter_count||1}`;row.append(av,m,meet);row.addEventListener('click',()=>openFriendDetail(f.friend_id));list.appendChild(row);});}catch(err){const e=document.createElement('div');e.className='xtw-inline-error';e.textContent='同窗冊讀取失敗：'+humanError(err);list.appendChild(e);}
   }
-  async function openFriendDetail(fid){const f=await getOne('friends',fid);if(!f){openBook();return;}const p=baseModal('Classmate · 同窗人物卡',f.name,`Lv.${f.level}${f.current_title?' · '+f.current_title:''}`);const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(f.name);const cp=document.createElement('div');cp.className='xtw-meet-copy';const n=document.createElement('b');n.textContent=f.name;const id=document.createElement('span');id.textContent=f.friend_id;cp.append(n,id,verifyBadge(!!f.verified));c.append(av,cp);p.appendChild(c);const grid=document.createElement('div');grid.className='xtw-detail-grid';[['初遇',fmt(f.first_met_at)],['最近相遇',fmt(f.last_met_at)],['相遇次數',String(f.encounter_count||1)+' 次'],['初遇稱號',f.joined_title||'—'],['目前稱號',f.current_title||'—'],['本機金鑰指紋',f.key_fp||'未建立']].forEach(([k,v])=>{const d=document.createElement('div');d.className='xtw-detail-cell';const s=document.createElement('small');s.textContent=k;const b=document.createElement('b');b.textContent=v;d.append(s,b);grid.appendChild(d);});p.appendChild(grid);const warn=document.createElement('div');warn.className='xtw-danger-note';warn.textContent='刪除只會移除「你這台裝置」上的紀錄；完全無後端模式無法遠端刪除對方手機裡的你。';p.appendChild(warn);const a=document.createElement('div');a.className='xtw-friend-actions';const del=btn('從同窗冊刪除','red');del.addEventListener('click',async()=>{if(!confirm(`確定要從這台裝置刪除「${f.name}」嗎？`))return;await deleteFriend(f.friend_id);toast('已從本機同窗冊刪除');openBook();});a.append(btn('返回同窗冊','ghost','book'),del);p.appendChild(a);}
+  async function openFriendDetail(fid){const f=await getOne('friends',fid);if(!f){openBook();return;}const p=baseModal('Classmate · 同窗人物卡',f.name,`Lv.${f.level}${f.current_title?' · '+f.current_title:''}`);const c=document.createElement('div');c.className='xtw-meet-card';const av=document.createElement('span');av.className='xtw-meet-avatar';av.textContent=initial(f.name);const cp=document.createElement('div');cp.className='xtw-meet-copy';const n=document.createElement('b');n.textContent=f.name;const id=document.createElement('span');id.textContent=f.friend_id;cp.append(n,id);c.append(av,cp);p.appendChild(c);appendFriendProgress(p,f);const grid=document.createElement('div');grid.className='xtw-detail-grid';const pc=Number(f.progress_cleared||0),pt=Number(f.progress_total||0);const highest=(f.highest_stage_id?f.highest_stage_id+(f.highest_stage_zh?' · '+f.highest_stage_zh:''):'—');const next=(pt&&pc>=pt?'全部通關':(f.next_stage_id?f.next_stage_id+(f.next_stage_zh?' · '+f.next_stage_zh:''):'—'));[['初遇',fmt(f.first_met_at)],['最近相遇',fmt(f.last_met_at)],['相遇次數',String(f.encounter_count||1)+' 次'],['目前稱號',f.current_title||'—'],['已通關',pt?`${pc} / ${pt}`:'尚未同步'],['最高已通關',highest],['下一關',next]].forEach(([k,v])=>{const d=document.createElement('div');d.className='xtw-detail-cell';const ss=document.createElement('small');ss.textContent=k;const bb=document.createElement('b');bb.textContent=v;d.append(ss,bb);grid.appendChild(d);});p.appendChild(grid);const warn=document.createElement('div');warn.className='xtw-danger-note';warn.textContent='刪除只會移除「你這台裝置」上的紀錄；完全無後端模式無法遠端刪除對方手機裡的你。';p.appendChild(warn);const a=document.createElement('div');a.className='xtw-friend-actions';const del=btn('從同窗冊刪除','red');del.addEventListener('click',async()=>{if(!confirm(`確定要從這台裝置刪除「${f.name}」嗎？`))return;await deleteFriend(f.friend_id);toast('已從本機同窗冊刪除');openBook();});a.append(btn('返回同窗冊','ghost','book'),del);p.appendChild(a);}
   async function deleteFriend(fid){const db=await openDB(),tx=db.transaction(['friends','encounters'],'readwrite');tx.objectStore('friends').delete(fid);const idx=tx.objectStore('encounters').index('friend_id'),range=IDBKeyRange.only(fid),req=idx.openCursor(range);req.onsuccess=()=>{const cur=req.result;if(cur){cur.delete();cur.continue();}};await txP(tx);await refreshCount();}
 
   async function exportBackup(){
@@ -86703,10 +86834,10 @@ const XTWFriends = (()=>{
     if(data.localStorage&&typeof data.localStorage==='object'){Object.entries(data.localStorage).forEach(([k,v])=>{if(LS_ALLOW.test(k)&&typeof v==='string')localStorage.setItem(k,v);});}
     toast('匯入完成，正在重新載入');setTimeout(()=>location.reload(),500);return true;
   }
-  function openBackup(){const p=baseModal('Local archive · 本機存檔','備份閒台文','換手機、清除網站資料或重設瀏覽器，都可能刪除 IndexedDB。定期匯出一份本機存檔即可搬移同窗冊與閒台文進度。');const grid=document.createElement('div');grid.className='xtw-backup-grid';const ex=document.createElement('div');ex.className='xtw-backup-card';const eb=document.createElement('b');eb.textContent='匯出存檔';const ep=document.createElement('p');ep.textContent='包含閒台文本機進度、同窗冊、相遇紀錄，以及同窗證簽章金鑰。';const ebtn=btn('匯出 .xtw.json','pri');ebtn.addEventListener('click',()=>exportBackup().catch(err=>alert(humanError(err))));ex.append(eb,ep,ebtn);const im=document.createElement('div');im.className='xtw-backup-card';const ib=document.createElement('b');ib.textContent='匯入存檔';const ip=document.createElement('p');ip.textContent='同窗資料採合併；同一位同窗以較新的相遇資料為主，不重複灌入相同相遇紀錄。';const ibtn=btn('選擇存檔','ghost');ibtn.addEventListener('click',()=>chooseBackup());im.append(ib,ip,ibtn);grid.append(ex,im);p.appendChild(grid);const n=document.createElement('div');n.className='xtw-danger-note';n.textContent='備份檔含可用來延續「同一張本機同窗證」的私鑰，請把它當作私人存檔保管，不要公開上傳。';p.appendChild(n);}
+  function openBackup(){const p=baseModal('Local archive · 本機存檔','備份閒台文','換手機、清除網站資料或重設瀏覽器，都可能刪除 IndexedDB。定期匯出一份本機存檔即可搬移同窗冊與閒台文進度。');const grid=document.createElement('div');grid.className='xtw-backup-grid';const ex=document.createElement('div');ex.className='xtw-backup-card';const eb=document.createElement('b');eb.textContent='匯出存檔';const ep=document.createElement('p');ep.textContent='包含閒台文本機進度、同窗冊、相遇紀錄，以及同窗證的本機身份資料。';const ebtn=btn('匯出 .xtw.json','pri');ebtn.addEventListener('click',()=>exportBackup().catch(err=>alert(humanError(err))));ex.append(eb,ep,ebtn);const im=document.createElement('div');im.className='xtw-backup-card';const ib=document.createElement('b');ib.textContent='匯入存檔';const ip=document.createElement('p');ip.textContent='同窗資料採合併；同一位同窗以較新的相遇資料為主，不重複灌入相同相遇紀錄。';const ibtn=btn('選擇存檔','ghost');ibtn.addEventListener('click',()=>chooseBackup());im.append(ib,ip,ibtn);grid.append(ex,im);p.appendChild(grid);const n=document.createElement('div');n.className='xtw-danger-note';n.textContent='備份檔含可延續同一張本機同窗證的身份資料，請當作私人存檔保管，不要公開上傳。';p.appendChild(n);}
   function chooseBackup(){const inp=document.createElement('input');inp.type='file';inp.accept='.json,.xtw,application/json';inp.hidden=true;document.body.appendChild(inp);inp.addEventListener('change',async()=>{try{if(inp.files&&inp.files[0])await importBackupFile(inp.files[0]);}catch(err){alert('匯入失敗：'+humanError(err));}finally{inp.remove();}},{once:true});inp.click();}
 
-  function humanError(err){const c=String(err&&err.message||err||'UNKNOWN');return ({BAD_QR:'QR 內容格式不正確。',NOT_XTW_QR:'這不是閒台文同窗證。',QR_VERSION:'同窗證版本不相容，請更新閒台文後再掃。',BAD_ID:'同窗 ID 格式錯誤。',BAD_NAME:'同窗名稱格式錯誤。',BAD_LEVEL:'等級資料錯誤。',BAD_TIME:'證件時間資料異常。',BAD_KEY:'簽章公鑰格式錯誤。',BAD_SIG:'簽章格式錯誤。',SELF:'這是你自己的同窗證，不能把自己加入同窗冊。',KEY_MISMATCH:'這個同窗 ID 的簽章金鑰與第一次相遇不同；為避免冒用，本次沒有更新。',SIGNED_DOWNGRADE:'這位同窗先前有可驗證簽章，本次證件卻沒有有效簽章；為避免降級冒用，本次沒有更新。',QR_TOO_LARGE:'同窗證資料太長，無法產生 QR。',INDEXEDDB_UNAVAILABLE:'此瀏覽器無法使用本機同窗冊。',BACKUP_SIZE:'備份檔過大。',BACKUP_FORMAT:'不是相容的閒台文本機存檔。'}[c]||c);}
+  function humanError(err){const c=String(err&&err.message||err||'UNKNOWN');return ({BAD_QR:'QR 內容格式不正確。',NOT_XTW_QR:'這不是閒台文同窗證。',QR_VERSION:'同窗證版本不相容，請更新閒台文後再掃。',BAD_ID:'同窗 ID 格式錯誤。',BAD_NAME:'同窗名稱格式錯誤。',BAD_LEVEL:'等級資料錯誤。',BAD_PROGRESS:'闖關進度資料錯誤。',BAD_TIME:'證件時間資料異常。',BAD_KEY:'同窗證驗證資料格式錯誤。',BAD_SIG:'同窗證驗證資料格式錯誤。',SELF:'這是你自己的同窗證，不能把自己加入同窗冊。',KEY_MISMATCH:'這張同窗證與第一次相遇時的身份驗證不一致；為避免冒用，本次沒有更新。',SIGNED_DOWNGRADE:'這張同窗證的身份驗證比第一次相遇時弱；為避免冒用，本次沒有更新。',QR_TOO_LARGE:'同窗證資料太長，無法產生 QR。',INDEXEDDB_UNAVAILABLE:'此瀏覽器無法使用本機同窗冊。',BACKUP_SIZE:'備份檔過大。',BACKUP_FORMAT:'不是相容的閒台文本機存檔。'}[c]||c);}
 
   function cleanIncoming(){try{const u=new URL(location.href);if(!u.searchParams.has('xtw_friend'))return;u.searchParams.delete('xtw_friend');history.replaceState(history.state,'',u.pathname+(u.search||'')+(u.hash||'#profile'));}catch(_){}}
   async function consumeIncoming(){
@@ -86714,9 +86845,9 @@ const XTWFriends = (()=>{
     const welcome=document.querySelector('#welcome:not([hidden])');if(welcome){setTimeout(consumeIncoming,650);return;}
     incomingBusy=true;try{const scan=await parseToken(token);cleanIncoming();showMeetConfirm(scan);}catch(err){cleanIncoming();showScanError(err);}finally{incomingBusy=false;}
   }
-  function onClick(e){const b=e.target.closest('[data-xf-act]');if(!b)return;const a=b.dataset.xfAct;if(a==='close')closeModal();else if(a==='pass')openPass();else if(a==='scan')openScanner();else if(a==='book')openBook();else if(a==='backup')openBackup();}
-  function init(){if(!started){started=true;document.addEventListener('click',onClick);window.addEventListener('hashchange',()=>{if(location.hash==='#profile')setTimeout(()=>mountProfile(document),60);},{passive:true});}openDB().catch(err=>console.warn('[同窗冊 DB]',err));consumeIncoming();}
-  return {init,profileHtml,mountProfile,openPass,openScanner,openBook};
+  function onClick(e){const b=e.target.closest('[data-xf-act]');if(!b)return;const a=b.dataset.xfAct;if(a==='close')closeModal();else if(a==='shop'){closeModal();go('shop');}else if(a==='pass')openPass();else if(a==='scan')openScanner();else if(a==='book')openBook();else if(a==='backup')openBackup();}
+  function init(){if(!started){started=true;document.addEventListener('click',onClick);window.addEventListener('hashchange',()=>{if(modal)closeModal();},{passive:true});window.addEventListener('pagehide',()=>{if(modal)closeModal();},{passive:true});}if(document.body)ensureDock();else window.addEventListener('DOMContentLoaded',ensureDock,{once:true});openDB().then(()=>refreshCount()).catch(err=>console.warn('[同窗冊 DB]',err));consumeIncoming();}
+  return {init,profileHtml,mountProfile,openPass,openScanner,openBook,close:closeModal,isOpen:()=>!!modal};
 })();
 window.XTWFriends=XTWFriends;
 
