@@ -3103,3 +3103,51 @@ body{padding-bottom:max(120px,calc(env(safe-area-inset-bottom,0px) + 104px));ove
 .q-retry-warning{margin-top:10px;padding:9px 11px;border-radius:12px;background:rgba(201,151,55,.10);font-size:12px;line-height:1.55;color:#775a16}
 [data-qgate-opt][disabled]{cursor:not-allowed}
 @media(max-width:560px){.q-retry-lock{align-items:flex-start}.q-retry-lock .qr-time{min-width:62px;font-size:16px}}
+
+
+/* ===== Desktop layout stabilization · v1.2 ===== */
+@media (min-width:1041px){
+  html,body{overflow-x:hidden}
+  body{padding-left:24px;padding-right:24px}
+  #app,.view{min-width:0;width:100%}
+  #app>.view.wrap,.wrap{width:min(1180px,100%);max-width:1180px;margin-left:auto;margin-right:auto}
+  .wrap-wide{width:min(1240px,100%);max-width:1240px;margin-left:auto;margin-right:auto}
+  .nav{width:min(1280px,calc(100vw - 32px));margin-left:auto;margin-right:auto}
+  .nav-links{min-width:0;overflow:hidden}
+  .nav-links .gs-row{min-width:0;justify-content:center}
+  .nav-links .gs-row>button{min-width:0}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+  .sec-head>div:first-child{min-width:0}
+  .hero{grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);align-items:center;gap:40px}
+  .demo{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}
+  .scene:not(.chip){grid-template-columns:minmax(0,1fr) 300px}
+  .cat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .diff-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .track-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .prog-grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+  .article{grid-template-columns:220px minmax(0,1fr)}
+  .profile-view{width:min(1180px,100%);max-width:1180px;margin-inline:auto;text-align:left}
+  .profile-view>.sec-head{text-align:left}
+  .profile-view .prof-head{display:flex;align-items:center;justify-content:flex-start;text-align:left;gap:18px;padding:22px}
+  .profile-view .profile-name-field{min-width:0;flex:1;max-width:520px}
+  .profile-view .profile-name-label{justify-content:space-between}
+  .profile-view .prof-head input{text-align:left;margin:0}
+  .profile-view .profile-level-line,.profile-view .profile-name-help,.profile-view .profile-name-help-en{text-align:left}
+  .profile-id-card .pid-grid{grid-template-columns:minmax(320px,1.12fr) minmax(280px,.88fr);align-items:start;justify-items:stretch}
+  .profile-id-card .pid-media{max-width:none;margin:0;width:100%}
+  .shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dragon-chapters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .closed-beta-gifts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .game-head{grid-template-columns:auto minmax(0,1fr) auto}
+  .lvmap{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .team-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
+  .culture-mast{grid-template-columns:minmax(0,1fr) 180px}
+  .culture-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
+  .culture-card{grid-column:span 4}
+  .culture-card.is-feature{grid-column:span 8;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr)}
+  .cert-save-modal .csm-card{grid-template-columns:minmax(260px,.88fr) minmax(300px,1.12fr)}
+}
+@media (min-width:1200px){
+  .nav-links .gs-row>button{padding-left:10px;padding-right:10px;font-size:13.5px}
+}
