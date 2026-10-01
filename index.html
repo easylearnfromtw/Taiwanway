@@ -5246,5 +5246,28 @@ img,video,canvas,svg{max-width:100%}
 </script>
 <!-- TAIWANWAY UNIFIED UX v1.21 END -->
 
+<!-- WELCOME REALLY AUDIO RESTORE v1 START -->
+<script id="aud-twm" type="application/json">{"M01_mrt_ask_station":"audio/twm/M01_mrt_ask_station.mp3","M02_mrt_thanks":"audio/twm/M02_mrt_thanks.mp3","M03_shop_price":"audio/twm/M03_shop_price.mp3","M04_shop_order":"audio/twm/M04_shop_order.mp3","M05_social_really":"audio/twm/M05_social_really.mp3","M06_social_easy":"audio/twm/M06_social_easy.mp3","M07_social_arriving":"audio/twm/M07_social_arriving.mp3","M08_social_contact":"audio/twm/M08_social_contact.mp3","M09_transit_bus":"audio/twm/M09_transit_bus.mp3","M10_transit_understood":"audio/twm/M10_transit_understood.mp3"}</script>
+<script id="welcome-really-audio-restore-v1">
+(()=>{
+  'use strict';
+  const DISPLAY='真的假的？';
+  const RECORDED='真的假的啦，太誇張了吧！';
+  const fix=()=>{
+    const w=document.getElementById('welcome');
+    if(!w)return;
+    w.querySelectorAll('[data-act="say"][data-t="'+DISPLAY+'"]').forEach(btn=>{
+      btn.dataset.t=RECORDED;
+      btn.dataset.welcomeAudioAlias='M05_social_really';
+      btn.setAttribute('aria-label','播放「真的假的？」真人錄音');
+    });
+  };
+  fix();
+  const mo=new MutationObserver(fix);
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+  addEventListener('pageshow',fix,{passive:true});
+})();
+</script>
+<!-- WELCOME REALLY AUDIO RESTORE v1 END -->
 </body>
 </html>
