@@ -80756,7 +80756,7 @@ function profileIdCard(){
   const lv=level(), stats=profileAbilities(), id=ensureProfileId(), src=profileCardVideo(), poster=profileCardPoster(), name=(S.name||'學習者').trim()||'學習者';
   const overlays=stats.map((a,i)=>abilityOverlay(a,i)).join('');
   const adminDeity=S.gender==='deity'&&window.PeaceIslandAdmin&&PeaceIslandAdmin.active();
-  const media=adminDeity?`<div class="pid-media pid-tilt-shell deity-card" data-gender="deity" data-tilt-card tabindex="0" aria-label="${esc(name)} 的天神人物卡，支援滑鼠與手機 3D 效果"><img class="pid-static-card" src="${poster}" alt=""><div class="pid-sheen" aria-hidden="true"></div><div class="pid-card-label pid-card-owner serif-zh">${esc(name)}</div><div class="pid-card-name pid-card-code pid-hand">${esc(id)}</div><div class="pid-card-level">Lv.${lv+1} · ${esc(LEVELS[lv][1])}</div>${window.TitleSystem?`<div class="pid-card-title" data-title-current><b>${esc(TitleSystem.current().zh)}</b><small>${esc(TitleSystem.current().en)}</small></div>`:''}${overlays}</div>`:src?`<div class="pid-media pid-tilt-shell" data-gender="${S.gender}" data-tilt-card tabindex="0" aria-label="${esc(name)} 的人物卡，支援滑鼠與手機 3D 效果"><video ${REDUCE?'':'autoplay'} loop muted playsinline preload="metadata" poster="${poster}"><source src="${src}" type="video/mp4"></video><div class="pid-sheen" aria-hidden="true"></div><div class="pid-card-label pid-card-owner serif-zh">${esc(name)}</div><div class="pid-card-name pid-card-code pid-hand">${esc(id)}</div><div class="pid-card-level">Lv.${lv+1} · ${esc(LEVELS[lv][1])}</div>${window.TitleSystem?`<div class="pid-card-title" data-title-current><b>${esc(TitleSystem.current().zh)}</b><small>${esc(TitleSystem.current().en)}</small></div>`:''}${overlays}</div>`:`<div class="pid-media pid-empty"><div class="pid-empty-mark serif-zh">我</div><b>尚未指定角色卡</b><span>在下方選擇性別後，人物 ID 卡會立即出現。</span></div>`;
+  const media=adminDeity?`<div class="pid-media pid-tilt-shell deity-card" data-gender="deity" tabindex="0" aria-label="${esc(name)} 的天神人物卡"><img class="pid-static-card" src="${poster}" alt=""><div class="pid-sheen" aria-hidden="true"></div><div class="pid-card-label pid-card-owner serif-zh">${esc(name)}</div><div class="pid-card-name pid-card-code pid-hand">${esc(id)}</div><div class="pid-card-level">Lv.${lv+1} · ${esc(LEVELS[lv][1])}</div>${window.TitleSystem?`<div class="pid-card-title" data-title-current><b>${esc(TitleSystem.current().zh)}</b><small>${esc(TitleSystem.current().en)}</small></div>`:''}${overlays}</div>`:src?`<div class="pid-media pid-tilt-shell" data-gender="${S.gender}" tabindex="0" aria-label="${esc(name)} 的人物卡"><video ${REDUCE?'':'autoplay'} loop muted playsinline preload="metadata" poster="${poster}"><source src="${src}" type="video/mp4"></video><div class="pid-sheen" aria-hidden="true"></div><div class="pid-card-label pid-card-owner serif-zh">${esc(name)}</div><div class="pid-card-name pid-card-code pid-hand">${esc(id)}</div><div class="pid-card-level">Lv.${lv+1} · ${esc(LEVELS[lv][1])}</div>${window.TitleSystem?`<div class="pid-card-title" data-title-current><b>${esc(TitleSystem.current().zh)}</b><small>${esc(TitleSystem.current().en)}</small></div>`:''}${overlays}</div>`:`<div class="pid-media pid-empty"><div class="pid-empty-mark serif-zh">我</div><b>尚未指定角色卡</b><span>在下方選擇性別後，人物 ID 卡會立即出現。</span></div>`;
   const currentTitle=window.TitleSystem?TitleSystem.current():null;
   return `<section class="card profile-id-card rise"><header class="pid-head"><div><div class="eyebrow">Learner identity · <span class="zh-font">人物識別</span></div><h2 class="h3 serif-zh">我的人物 ID</h2><p class="pid-head-sub">這張卡代表這台裝置上的學習身分；名稱、等級、稱號與能力會隨進度更新。</p></div><span class="chip pid-local-chip">僅存此裝置</span></header><div class="pid-grid">${media}<aside class="pid-info"><div class="pid-idline"><span><small>PERSON ID</small>人物 ID</span><b class="pid-hand">${esc(id)}</b></div><div class="pid-person">${profileCircleAvatarMarkup('')}<div><span class="pid-person-kicker">LEARNER</span><strong class="serif-zh">${esc(name)}</strong><div class="pid-person-meta"><span>${profileGenderLabel()}</span><span>Lv.${lv+1}</span><span>${esc(LEVELS[lv][1])}</span><span>${S.xp} XP</span></div>${currentTitle?`<div class="pid-current-title"><small>目前稱號</small><b>${esc(currentTitle.zh)}</b><span>${esc(currentTitle.en)}</span></div>`:''}</div></div><div class="pid-abilities">${stats.map((a,i)=>`<div class="pid-ability" style="--delay:${i}"><span class="pid-ico">${a.icon}</span><div class="pid-ability-copy"><div class="pid-ahead"><b>${a.zh}<small>${a.en}</small></b><span class="pid-score-wrap"><strong class="pid-score num">${a.v}</strong><small>/100</small></span></div><div class="pid-meter"><i style="--target:${a.v}%"></i></div><small class="pid-ability-note">${a.note}</small></div></div>`).join('')}</div><div class="pid-note"><b>能力值</b><span>華語力看 XP、闖關力看通關、持續力看連續學習、探索力看片語與情境；證書提供專項加成，分數越高加成越收斂。</span></div><div class="pid-gender"><div><b>人物卡設定</b><span>可隨時切換角色外觀；只會改這台裝置上的人物卡。</span></div>${genderOptionsHtml()}</div></aside></div></section>`;
 }
@@ -80814,7 +80814,7 @@ function syncProfileIdentityUI(){
   $$('.pid-card-label').forEach(el=>{el.textContent=shown;});
   $$('.pid-person > div > strong.serif-zh').forEach(el=>{el.textContent=shown;});
   $$('.pid-media[aria-label]').forEach(el=>{
-    const suffix=el.dataset.gender==='deity'?' 的天神人物卡，支援滑鼠與手機 3D 效果':' 的人物卡，支援滑鼠與手機 3D 效果';
+    const suffix=el.dataset.gender==='deity'?' 的天神人物卡':' 的人物卡';
     el.setAttribute('aria-label',shown+suffix);
   });
 
@@ -81011,12 +81011,18 @@ function setupReveal(app) {
 
 let profileTiltCleanup = null;
 function initProfileFX(app){
+  if(profileTiltCleanup){try{profileTiltCleanup();}catch(_){} profileTiltCleanup=null;}
   const card = app.querySelector('.profile-id-card');
   if(!card) return;
   card.classList.remove('fx-on');
+  card.querySelectorAll('[data-tilt-card]').forEach(el=>{
+    el.removeAttribute('data-tilt-card');
+    el.style.transform='none';
+    el.style.removeProperty('--mx');el.style.removeProperty('--my');
+    el.style.removeProperty('--sx');el.style.removeProperty('--sy');
+  });
   void card.offsetWidth;
   requestAnimationFrame(()=>card.classList.add('fx-on'));
-  setupProfileCardTilt(card.querySelector('[data-tilt-card]'));
 }
 function setupProfileCardTilt(el){
   if(profileTiltCleanup){ try{ profileTiltCleanup(); }catch(e){} profileTiltCleanup=null; }
@@ -82052,7 +82058,40 @@ const ShopSystem = (() => {
     const buyLabel=st.owned?'已持有':st.can?`購買 ${item.type==='consumable'?`×${q.qty}`:''}`:'資源不足';
     return `<section class="shop-hud-focus"><div class="shop-hud-focus-top"><div><span class="shop-hud-eyebrow">${meta[1]} / ${meta[0]}</span><h2>${esc(item.name)}</h2><p>${esc(item.en)}</p></div><span class="shop-hud-status">${status}</span></div><div class="shop-hud-stage">${art?`<img src="${art}" alt="${esc(item.name)}" decoding="async">`:`<span class="shop-hud-stage-fallback serif-zh">${item.name[0]}</span>`}<span class="shop-hud-gridline" aria-hidden="true"></span></div><div class="shop-hud-desc"><p>${esc(item.effect)}</p>${discountLabel(q)?`<small>${esc(discountLabel(q))}</small>`:''}</div><div class="shop-hud-buybar"><div class="shop-hud-cost"><small>PRICE</small>${priceHtml(item,q)}</div>${qty}<div class="shop-hud-main-actions"><button type="button" class="btn ghost" data-shop-detail="${item.id}">詳細資料</button><button type="button" class="btn pri" data-shop-buy="${item.id}" data-buy-qty="${q.qty}" ${st.can?'':'disabled'}>${buyLabel}</button>${item.type==='consumable'?`<button type="button" class="btn use" data-shop-activate="${item.id}" ${st.inv>0?'':'disabled'}>啟用</button>`:''}</div>${st.short.length?`<div class="shop-hud-short">${st.short.join(' · ')}</div>`:''}</div></section>`;
   }
-  function inventoryHtml(){const rows=CATALOG.filter(i=>i.type==='consumable'&&(stock(i.id)||activeCount(i.id))).map(i=>{const art=window.TWW_ITEM_ART?.[i.id]||'';return `<div class="shop-inventory-row">${art?`<span class="shop-inventory-art"><img src="${art}" alt="" loading="lazy"></span>`:''}<div><b>${esc(i.name)}</b><small>持有 ${stock(i.id)} · 已啟用 ${activeCount(i.id)}</small></div><button class="btn pri sm" data-shop-activate="${i.id}" ${stock(i.id)>0?'':'disabled'}>啟用</button></div>`}).join('')||'<p class="muted">目前沒有夜市道具。</p>';return `<div class="shop-inventory-drawer" role="dialog" aria-modal="true"><section class="shop-sheet-card"><div class="shop-sheet-head"><div><small>MY ITEMS</small><h2 class="serif-zh">我的道具</h2></div><button class="shop-sheet-close" data-shop-close="inventory" aria-label="關閉">×</button></div><div class="shop-inventory-list">${rows}${hasOsen()?`<div class="shop-inventory-row"><span class="shop-inventory-art"><img src="${window.TWW_ITEM_ART?.osenResident||''}" alt="" loading="lazy"></span><div><b>O森島民證書</b><small>永久被動 ON</small></div><span>永久</span></div>`:''}</div></section></div>`;}
+  function inventoryHtml(){
+    const owned=CATALOG.filter(i=>i.type==='permanent'?hasPermanent(i.id):(stock(i.id)>0||activeCount(i.id)>0));
+    const stockTotal=owned.reduce((n,i)=>n+(i.type==='consumable'?stock(i.id):0),0);
+    const activeTotal=owned.reduce((n,i)=>n+(i.type==='consumable'?activeCount(i.id):0),0);
+    const rows=owned.map(i=>{
+      const art=window.TWW_ITEM_ART?.[i.id]||'',permanent=i.type==='permanent',have=permanent?1:stock(i.id),active=permanent?1:activeCount(i.id);
+      return `<article class="shop-inventory-row">
+        <span class="shop-inventory-art">${art?`<img src="${art}" alt="" loading="lazy" decoding="async">`:`<b>${esc(i.name).slice(0,1)}</b>`}</span>
+        <span class="shop-inventory-copy"><small>${esc(i.en||'NIGHT MARKET ITEM')}</small><b>${esc(i.name)}</b><em>${permanent?'永久收藏':`持有 ${have} · 已啟用 ${active}`}</em></span>
+        ${permanent?`<span class="shop-inventory-badge">永久</span>`:`<button class="btn pri sm shop-inventory-use" data-shop-activate="${i.id}" ${have>0?'':'disabled'}>${have>0?'啟用':'無庫存'}</button>`}
+      </article>`;
+    }).join('');
+    const osen=hasOsen()?`<article class="shop-inventory-row shop-inventory-permanent">
+      <span class="shop-inventory-art"><img src="${window.TWW_ITEM_ART?.osenResident||''}" alt="" loading="lazy" decoding="async"></span>
+      <span class="shop-inventory-copy"><small>PERMANENT PASSIVE</small><b>O森島民證書</b><em>永久被動 ON</em></span>
+      <span class="shop-inventory-badge">永久</span>
+    </article>`:'';
+    const content=(rows||osen)?rows+osen:`<div class="shop-inventory-empty"><b>目前沒有道具</b><span>從補給站購入後，會直接整理在這裡。</span></div>`;
+    return `<div class="shop-inventory-drawer shop-inventory-v120" role="dialog" aria-modal="true">
+      <section class="shop-sheet-card shop-inventory-panel-v120">
+        <header class="shop-inventory-head-v120">
+          <div><small>LOADOUT · MY ITEMS</small><h2 class="serif-zh">我的道具</h2><p>持有、啟用與永久被動集中管理。</p></div>
+          <button class="shop-sheet-close" data-shop-close="inventory" aria-label="關閉">×</button>
+        </header>
+        <div class="shop-inventory-stats-v120">
+          <span><small>種類</small><b>${owned.length+(hasOsen()?1:0)}</b></span>
+          <span><small>庫存</small><b>${stockTotal}</b></span>
+          <span><small>已啟用</small><b>${activeTotal}</b></span>
+        </div>
+        <div class="shop-inventory-list">${content}</div>
+        <footer class="shop-inventory-foot-v120"><button type="button" class="btn ghost" data-shop-close="inventory">返回商城</button></footer>
+      </section>
+    </div>`;
+  }
   function detailHtml(id){const item=byId(id);if(!item)return '';const q=quote(id,qtyFor(id)),art=window.TWW_ITEM_ART?.[id]||'';return `<div class="shop-detail-sheet" role="dialog" aria-modal="true"><section class="shop-sheet-card"><div class="shop-sheet-head"><div><small>${esc(item.en)}</small><h2 class="serif-zh">${esc(item.name)}</h2></div><button class="shop-sheet-close" data-shop-close="detail" aria-label="關閉">×</button></div>${art?`<div class="shop-detail-art"><img src="${art}" alt="${esc(item.name)}" decoding="async"></div>`:''}<div class="shop-detail-effect">${esc(item.effect)}</div><div class="shop-price">${priceHtml(item,q)}</div>${item.type==='consumable'?`<div class="shop-qty" style="margin-top:12px">${[1,3,5,10].map(n=>`<button type="button" data-shop-qty="${item.id}" data-qty="${n}" class="${q.qty===n?'on':''}">×${n}</button>`).join('')}</div>`:''}<p class="small muted">${discountLabel(q)||'目前沒有套用折扣。'}${q.rate<1?` · 最終採無條件進位`:''}</p><div class="shop-actions"><button type="button" class="btn pri" data-shop-buy="${item.id}" data-buy-qty="${q.qty}">${item.type==='permanent'&&hasPermanent(item.id)?'已持有':`以 ${priceText(q)} 購買${item.type==='consumable'?` ×${q.qty}`:''}`}</button></div></section></div>`;}
   function pageHtml(){
     const g=G(),items=CATALOG.filter(i=>ui.filter==='all'||i.cat===ui.filter),m=marketState();
@@ -86788,9 +86827,48 @@ const XTWFriends = (()=>{
         const grid=document.createElement('div');grid.className='xtw-hub-grid';grid.append(hubAction('市','逛夜市商城','買道具、永久被動與魔龍戰用品。','shop','shop-action'),hubAction('物','我的道具','查看目前持有與已啟用的夜市道具。','shop-inventory','shop-action'),hubAction('籤','今日一抽','進入夜市後查看今日免費抽與加抽。','shop-gacha','shop-action'));body.appendChild(grid);
         const note=document.createElement('div');note.className='xtw-hub-market-note';note.textContent='商城與同窗共用同一個入口；離開這個面板後，遊戲與好友資料仍全部保存在這台裝置。';body.appendChild(note);
       }else{
-        const grid=document.createElement('div');grid.className='xtw-hub-grid';const a=hubAction('證','我的同窗證','顯示自己的 QR，讓朋友掃證相認。','pass');const b=hubAction('掃','掃證相認','只用 QR 加同窗，不提供陌生人搜尋。','scan');const c=hubAction('冊','同窗冊','查看好友進度、最高關卡與相遇紀錄。','book');const badge=document.createElement('span');badge.className='mini-count';badge.dataset.xtwFriendCount='';badge.textContent=String(friendN);c.appendChild(badge);grid.append(a,b,c);body.appendChild(grid);
-        const pr=pp.progress||{},cleared=Number(pr.cleared||0),total=Number(pr.total||0),pct=total?Math.max(0,Math.min(100,Math.round(cleared/total*100))):0;const prog=document.createElement('div');prog.className='xtw-hub-progress';const ph=document.createElement('div');ph.className='xtw-hub-progress-head';const l=document.createElement('span');l.innerHTML='<b>我的闖關進度</b>';const r=document.createElement('span');r.textContent=total?`${cleared} / ${total}`:'尚未同步';ph.append(l,r);const bar=document.createElement('div');bar.className='bar';const i=document.createElement('i');i.style.width=pct+'%';bar.appendChild(i);const next=document.createElement('span');next.className='small';next.textContent=progressLine(pr);prog.append(ph,bar,next);body.appendChild(prog);
-        const ft=document.createElement('div');ft.className='xtw-hub-footer';const bk=btn('本機備份','ghost','backup');bk.classList.add('sm');ft.appendChild(bk);body.appendChild(ft);
+        const top=document.createElement('div');top.className='xtw-hub-friends-top';
+        const intro=document.createElement('div');intro.className='xtw-hub-friends-copy';
+        const ik=document.createElement('small');ik.textContent='CLASSMATE BOOK · 同窗冊';
+        const ih=document.createElement('h3');ih.textContent=friendN?friendN+' 位同窗':'還沒有同窗';
+        const ip=document.createElement('p');ip.textContent=friendN?'好友直接顯示在這裡；點人物即可看關卡、稱號與相遇紀錄。':'和朋友交換同窗證後，好友會直接出現在這裡。';
+        intro.append(ik,ih,ip);
+        const qa=document.createElement('div');qa.className='xtw-hub-friends-actions';
+        const pass=btn('我的同窗證','ghost','pass'),scan=btn('掃證相認','pri','scan'),backup=btn('本機備份','ghost','backup');
+        pass.classList.add('sm');scan.classList.add('sm');backup.classList.add('sm');qa.append(pass,scan,backup);top.append(intro,qa);body.appendChild(top);
+
+        const list=document.createElement('div');list.className='xtw-book-list xtw-hub-friend-list';body.appendChild(list);
+        try{
+          const friends=(await getAll('friends')).sort((a,b)=>Number(b.last_met_at||0)-Number(a.last_met_at||0));
+          if(!friends.length){
+            const e=document.createElement('div');e.className='xtw-book-empty xtw-hub-friend-empty';
+            e.innerHTML='<b>同窗冊目前是空的</b><span>按上方「掃證相認」掃朋友的 QR，同窗會直接加入這個列表。</span>';
+            list.appendChild(e);
+          }else{
+            friends.forEach(f=>{
+              const row=document.createElement('button');row.type='button';row.className='xtw-book-row xtw-hub-friend-row';
+              const av=document.createElement('span');av.className='xtw-book-avatar';av.textContent=initial(f.name);
+              const m=document.createElement('span');m.className='xtw-book-main';
+              const b=document.createElement('b');b.textContent=f.name;
+              const s=document.createElement('span');const pc=Number(f.progress_cleared||0),pt=Number(f.progress_total||0);
+              s.textContent=`Lv.${f.level}${f.current_title?' · '+f.current_title:''}${pt?' · 通關 '+pc+'/'+pt:''}`;
+              const last=document.createElement('small');last.textContent='最近相遇 '+fmt(f.last_met_at);
+              m.append(b,s,last);
+              const meet=document.createElement('span');meet.className='xtw-book-meets';meet.innerHTML='<b>× '+(f.encounter_count||1)+'</b><small>相遇</small>';
+              row.append(av,m,meet);row.addEventListener('click',()=>openFriendDetail(f.friend_id));list.appendChild(row);
+            });
+          }
+        }catch(err){
+          const e=document.createElement('div');e.className='xtw-inline-error';e.textContent='同窗冊讀取失敗：'+humanError(err);list.appendChild(e);
+        }
+
+        const pr=pp.progress||{},cleared=Number(pr.cleared||0),total=Number(pr.total||0),pct=total?Math.max(0,Math.min(100,Math.round(cleared/total*100))):0;
+        const prog=document.createElement('div');prog.className='xtw-hub-progress xtw-hub-self-progress';
+        const ph=document.createElement('div');ph.className='xtw-hub-progress-head';
+        const l=document.createElement('span');l.innerHTML='<b>我的闖關進度</b>';
+        const rr=document.createElement('span');rr.textContent=total?`${cleared} / ${total}`:'尚未同步';ph.append(l,rr);
+        const bar=document.createElement('div');bar.className='bar';const ii=document.createElement('i');ii.style.width=pct+'%';bar.appendChild(ii);
+        const next=document.createElement('span');next.className='small';next.textContent=progressLine(pr);prog.append(ph,bar,next);body.appendChild(prog);
       }
     };
     tabs.addEventListener('click',e=>{const b=e.target.closest('[data-hub-tab]');if(b)renderTab(b.dataset.hubTab);});await renderTab(initialTab);
@@ -86803,7 +86881,15 @@ const XTWFriends = (()=>{
   async function refreshCount(){const n=await countFriends().catch(()=>0);$$('[data-xtw-friend-count]').forEach(el=>el.textContent=String(n));}
 
   function lock(){document.documentElement.classList.add('xtw-friend-lock');}
-  function unlock(){document.documentElement.classList.remove('xtw-friend-lock');}
+  function unlock(){
+    const root=document.documentElement;
+    root.classList.remove('xtw-friend-lock');
+    if(!document.querySelector('.xtw-friend-ov')){
+      root.style.removeProperty('overflow');
+      root.style.removeProperty('overscroll-behavior');
+      if(document.body){document.body.style.removeProperty('overflow');document.body.style.removeProperty('overscroll-behavior');}
+    }
+  }
   function stopScan(){if(scanRaf)cancelAnimationFrame(scanRaf);scanRaf=0;scanBusy=false;if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}}
   function closeModal(){stopScan();if(modal){modal.remove();modal=null;}unlock();}
   function baseModal(kicker,title,sub){
