@@ -836,7 +836,7 @@ const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : s;
 const pyLine = (zh, py) => cap(romLine(zh, py, markSyl));
 const zyLine = (zh, py) => romLine(zh, py, zhuyin, true);
 /* NEW TAIWAN-VOICE ONLY. Legacy audio index removed. */
-const AUDIO_INDEX = {"帥哥，要吃什麼？":["twf","F01_breakfast_greeting"],"今天鐵板麵不錯喔！":["twf","F02_breakfast_recommend"],"要內用還是外帶？":["twf","F03_breakfast_here_to_go"],"飲料要紅茶還是奶茶？":["twf","F04_breakfast_drink"],"好，總共八十五塊。等一下喔！":["twf","F05_breakfast_total"],"沒關係，你慢慢看。":["twf","F06_shop_take_your_time"],"欸，不好意思，請問一下這附近有捷運站嗎？":["twm","M01_mrt_ask_station"],"喔，原來要往那邊走，謝謝你。":["twm","M02_mrt_thanks"],"老闆，這個多少錢？":["twm","M03_shop_price"],"那我要一個，然後飲料給我紅茶就好。":["twm","M04_shop_order"],"真的假的啦，太誇張了吧！":["twm","M05_social_really"],"沒關係，慢慢來就好。":["twm","M06_social_easy"],"欸，你等我一下，我快到了。":["twm","M07_social_arriving"],"好啊，那我們等一下再聯絡喔。":["twm","M08_social_contact"],"不好意思，我想問一下這班車有到台北車站嗎？":["twm","M09_transit_bus"],"好，了解，謝謝。":["twm","M10_transit_understood"]};
+const AUDIO_INDEX = {"帥哥，要吃什麼？":["twf","F01_breakfast_greeting"],"今天鐵板麵不錯喔！":["twf","F02_breakfast_recommend"],"要內用還是外帶？":["twf","F03_breakfast_here_to_go"],"飲料要紅茶還是奶茶？":["twf","F04_breakfast_drink"],"好，總共八十五塊。等一下喔！":["twf","F05_breakfast_total"],"沒關係，你慢慢看。":["twf","F06_shop_take_your_time"],"欸，不好意思，請問一下這附近有捷運站嗎？":["twm","M01_mrt_ask_station"],"喔，原來要往那邊走，謝謝你。":["twm","M02_mrt_thanks"],"老闆，這個多少錢？":["twm","M03_shop_price"],"那我要一個，然後飲料給我紅茶就好。":["twm","M04_shop_order"],"真的假的？":["twm","M05_social_really"],"真的假的啦，太誇張了吧！":["twm","M05_social_really"],"沒關係，慢慢來就好。":["twm","M06_social_easy"],"欸，你等我一下，我快到了。":["twm","M07_social_arriving"],"好啊，那我們等一下再聯絡喔。":["twm","M08_social_contact"],"不好意思，我想問一下這班車有到台北車站嗎？":["twm","M09_transit_bus"],"好，了解，謝謝。":["twm","M10_transit_understood"]};
 /* No legacy/context fallback. Only explicitly recorded Taiwan-voice clips are allowed. */
 const VOICE_AUDIO_INDEX = {"zhuyin-symbol:ㄅ":["zytrue","3105"],"zhuyin-symbol:ㄆ":["zytrue","3106"],"zhuyin-symbol:ㄇ":["zytrue","3107"],"zhuyin-symbol:ㄈ":["zytrue","3108"],"zhuyin-symbol:ㄉ":["zytrue","3109"],"zhuyin-symbol:ㄊ":["zytrue","310a"],"zhuyin-symbol:ㄋ":["zytrue","310b"],"zhuyin-symbol:ㄌ":["zytrue","310c"],"zhuyin-symbol:ㄍ":["zytrue","310d"],"zhuyin-symbol:ㄎ":["zytrue","310e"],"zhuyin-symbol:ㄏ":["zytrue","310f"],"zhuyin-symbol:ㄐ":["zytrue","3110"],"zhuyin-symbol:ㄑ":["zytrue","3111"],"zhuyin-symbol:ㄒ":["zytrue","3112"],"zhuyin-symbol:ㄓ":["zytrue","3113"],"zhuyin-symbol:ㄔ":["zytrue","3114"],"zhuyin-symbol:ㄕ":["zytrue","3115"],"zhuyin-symbol:ㄖ":["zytrue","3116"],"zhuyin-symbol:ㄗ":["zytrue","3117"],"zhuyin-symbol:ㄘ":["zytrue","3118"],"zhuyin-symbol:ㄙ":["zytrue","3119"],"zhuyin-symbol:ㄚ":["zytrue","311a"],"zhuyin-symbol:ㄛ":["zytrue","311b"],"zhuyin-symbol:ㄜ":["zytrue","311c"],"zhuyin-symbol:ㄝ":["zytrue","311d"],"zhuyin-symbol:ㄞ":["zytrue","311e"],"zhuyin-symbol:ㄟ":["zytrue","311f"],"zhuyin-symbol:ㄠ":["zytrue","3120"],"zhuyin-symbol:ㄡ":["zytrue","3121"],"zhuyin-symbol:ㄢ":["zytrue","3122"],"zhuyin-symbol:ㄣ":["zytrue","3123"],"zhuyin-symbol:ㄤ":["zytrue","3124"],"zhuyin-symbol:ㄥ":["zytrue","3125"],"zhuyin-symbol:ㄦ":["zytrue","3126"],"zhuyin-symbol:ㄧ":["zytrue","3127"],"zhuyin-symbol:ㄨ":["zytrue","3128"],"zhuyin-symbol:ㄩ":["zytrue","3129"]};
 function voiceHash(text){let h=2166136261>>>0;const s=String(text||'');for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h.toString(36);}
@@ -79204,6 +79204,11 @@ const AudioEng = {
 
   group(g) {
     if (this.groups[g]) return this.groups[g];
+    const globalManifest = window['__AUD_' + g];
+    if (globalManifest && typeof globalManifest === 'object') {
+      this.groups[g] = Promise.resolve(globalManifest);
+      return this.groups[g];
+    }
     const emb = document.getElementById('aud-' + g);
     const viaScript = () => new Promise((res, rej) => {
       const k = '__AUD_' + g; if (window[k]) return res(window[k]);
@@ -79439,7 +79444,9 @@ const AudioEng = {
   async _nativeSource(text, vkey='') {
     const e = clipEntry(text, vkey); if (!e) return null;
     const data = await this.group(e[0]), item = data && data[e[1]]; if (!item) return null;
-    if (/^https:\/\//i.test(item)) return {src:item, revoke:false};
+    // File-backed recordings are URLs, not Base64. This is the critical
+    // iOS fallback when WebAudio is interrupted or decodeAudioData fails.
+    if (/^(?:https?:\/\/|blob:|data:|\/|\.{1,2}\/|audio\/|soundscape\/)/i.test(item)) return {src:item, revoke:false};
     const bin = atob(item), arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
     const url = URL.createObjectURL(new Blob([arr], {type:'audio/mpeg'}));
@@ -79796,7 +79803,12 @@ window.addEventListener('pageshow',()=>setTimeout(wakeAudioSystem,80));
 window.addEventListener('focus',()=>setTimeout(wakeAudioSystem,80));
 window.addEventListener('online',()=>setTimeout(wakeAudioSystem,120));
 ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,()=>{
-  try{ AudioEng.ensure(); AudioEng.wake('gesture'); }catch(_){}
+  try{
+    // A fresh user gesture may retry WebAudio after an iOS interruption.
+    // If it fails again, the repaired native <audio> path takes over.
+    if(!AudioEng.playback && !AudioEng.native) AudioEng.webAudioUnstable=false;
+    AudioEng.ensure(); AudioEng.wake('gesture');
+  }catch(_){}
 },{passive:true,capture:true}));
 try{
   if(navigator.audioSession?.addEventListener) navigator.audioSession.addEventListener('statechange',()=>{
