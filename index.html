@@ -226,12 +226,12 @@
 .xtw-prelude-meta{display:flex;align-items:end;justify-content:space-between;gap:18px;text-align:left}
 .xtw-prelude-status{display:grid;gap:4px;min-width:0}
 .xtw-prelude-status b{font:750 clamp(13px,3.3vw,16px)/1.35 system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#292722}
-.xtw-prelude-status small{font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;color:#8b8275;text-transform:uppercase}
+.xtw-prelude-status small{display:none!important}
 .xtw-prelude-pct{font:500 clamp(34px,9vw,52px)/.8 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.07em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .xtw-prelude-pct small{font-size:.34em;letter-spacing:0;color:#8b8275;margin-left:4px}
 .xtw-prelude-track{height:3px;border-radius:999px;background:rgba(55,51,44,.11);overflow:hidden}
 .xtw-prelude-fill{display:block;width:100%;height:100%;transform:scaleX(var(--xtw-p,.03));transform-origin:0 50%;background:linear-gradient(90deg,#282722,#b89a73 76%,#d4b58c);transition:transform .38s cubic-bezier(.2,.8,.2,1)}
-.xtw-prelude-note{min-height:1.45em;font:600 11px/1.45 system-ui,-apple-system,"Noto Sans TC",sans-serif;color:#8b8275}
+.xtw-prelude-note{display:none!important}
 #boot-screen.soft-ready .xtw-prelude-note{color:#625b51}
 @keyframes xtwLogoReveal{to{clip-path:inset(0 0 0 0)}}
 @keyframes xtwLogoSweep{0%{transform:translateX(-72%) skewX(-12deg);opacity:0}20%{opacity:1}100%{transform:translateX(72%) skewX(-12deg);opacity:0}}
@@ -264,9 +264,9 @@
     <div class="xtw-prelude-logo" aria-hidden="true"><img src="assets/prelude-logo.webp" alt=""></div>
     <div class="xtw-prelude-welcome"><b>歡迎光臨</b><span>閒台文 · TAI WAN WAY</span></div>
     <div class="xtw-prelude-progress">
-      <div class="xtw-prelude-meta"><div class="xtw-prelude-status"><b id="xtw-load-status">正在打開閒台文</b><small id="xtw-load-tech">Critical Prelude</small></div><div class="xtw-prelude-pct"><span id="xtw-load-pct">03</span><small>%</small></div></div>
+      <div class="xtw-prelude-meta"><div class="xtw-prelude-status"><b id="xtw-load-status">唐山過台灣</b><small id="xtw-load-tech" aria-hidden="true"></small></div><div class="xtw-prelude-pct"><span id="xtw-load-pct">0</span><small>%</small></div></div>
       <div class="xtw-prelude-track" aria-hidden="true"><i class="xtw-prelude-fill"></i></div>
-      <div class="xtw-prelude-note" id="xtw-load-note">先讓歡迎頁出現，其他內容會在背景繼續準備。</div>
+      <div class="xtw-prelude-note" id="xtw-load-note" aria-hidden="true"></div>
     </div>
   </div>
 </div>
@@ -274,32 +274,54 @@
 (function(){
   'use strict';
   var boot=document.getElementById('boot-screen'),pct=document.getElementById('xtw-load-pct'),status=document.getElementById('xtw-load-status'),tech=document.getElementById('xtw-load-tech'),note=document.getElementById('xtw-load-note');
-  var shown=3,target=3,raf=0,released=false,complete=false,hud=null,hudPct=null,hudStatus=null,hudTech=null,started=performance.now();
+  var shown=0,target=0,raf=0,released=false,complete=false,hud=null,hudPct=null,hudStatus=null,hudTech=null,started=performance.now();
   var idle=window.requestIdleCallback||function(cb,o){return setTimeout(function(){cb({didTimeout:true,timeRemaining:function(){return 0}})},(o&&o.timeout)||32)};
   try{performance.mark('xtw-prelude-visible')}catch(_){}
+  var STORY=[
+    {at:0,pct:0,text:'唐山過台灣'},
+    {at:38,pct:38,text:'與台灣原住民交朋友'},
+    {at:52,pct:52,text:'阿美族的朋友說我皮膚很白'},
+    {at:73,pct:73,text:'後來和客家人一起採茶'},
+    {at:100,pct:100,text:'採茶成功！'}
+  ];
+  function storyFor(v){
+    var n=Math.max(0,Math.min(100,Number(v)||0)),out=STORY[0];
+    for(var i=0;i<STORY.length;i++){if(n>=STORY[i].at)out=STORY[i];else break;}
+    return out;
+  }
+  function paintStory(){
+    var st=storyFor(shown);
+    if(pct&&boot)pct.textContent=String(st.pct);
+    if(status&&boot)status.textContent=st.text;
+    if(tech)tech.textContent='';
+    if(note)note.textContent='';
+    if(hudPct)hudPct.textContent=String(st.pct)+'%';
+    if(hudStatus)hudStatus.textContent=st.text;
+    if(hudTech)hudTech.textContent='';
+    return st;
+  }
   function syncHud(){
     if(!hud)return;
-    if(hudPct)hudPct.textContent=String(Math.max(0,Math.min(100,Math.round(shown)))).padStart(2,'0')+'%';
+    paintStory();
     hud.style.setProperty('--xtw-bg-p',(Math.max(0,Math.min(100,shown))/100).toFixed(4));
   }
   function paint(){
     var delta=target-shown;shown+=Math.abs(delta)<.35?delta:Math.max(.18,delta*.12);
-    if(pct&&boot)pct.textContent=String(Math.max(0,Math.min(100,Math.round(shown)))).padStart(2,'0');
     if(boot)boot.style.setProperty('--xtw-p',(Math.max(0,Math.min(100,shown))/100).toFixed(4));
+    paintStory();
     syncHud();
     if(Math.abs(target-shown)>.2)raf=requestAnimationFrame(paint);else raf=0;
   }
   function mark(p,msg,t,n){
     target=Math.max(target,Math.min(100,Number(p)||0));
-    if(msg&&status)status.textContent=msg;if(t&&tech)tech.textContent=t;if(n&&note)note.textContent=n;
-    if(msg&&hudStatus)hudStatus.textContent=msg;if(t&&hudTech)hudTech.textContent=t;
+    // User-facing loading copy is intentionally driven only by STORY milestones.
     if(!raf)raf=requestAnimationFrame(paint);
   }
   function mountHud(){
     if(hud||complete)return hud;
     var host=document.getElementById('welcome')||document.body;if(!host)return null;
     hud=document.createElement('div');hud.id='xtw-bg-load';hud.setAttribute('role','status');hud.setAttribute('aria-live','polite');hud.setAttribute('aria-label','背景載入進度');
-    hud.innerHTML='<div class="xtw-bg-status"><b>正在背景整理內容</b><small>Background Loading</small></div><div class="xtw-bg-pct">'+String(Math.round(shown)).padStart(2,'0')+'%</div><div class="xtw-bg-track" aria-hidden="true"><i></i></div>';
+    hud.innerHTML='<div class="xtw-bg-status"><b>唐山過台灣</b><small aria-hidden="true"></small></div><div class="xtw-bg-pct">0%</div><div class="xtw-bg-track" aria-hidden="true"><i></i></div>';
     host.appendChild(hud);hudPct=hud.querySelector('.xtw-bg-pct');hudStatus=hud.querySelector('.xtw-bg-status b');hudTech=hud.querySelector('.xtw-bg-status small');syncHud();return hud;
   }
   function release(){
@@ -346,8 +368,8 @@
   }
   window.XTW_BOOT={mark:mark,release:release,runScript:runScript,ensureAudio:ensureAudio,ensureDragon:ensureDragon,warmDragon:warmDragonAssets,warmCertificate:warmCertificateAssets,done:done,get elapsed(){return performance.now()-started},get progress(){return Math.round(shown)}};
   mark(8,'歡迎頁正在出現','Critical UI');
-  setTimeout(function(){if(!released){boot&&boot.classList.add('soft-ready');mark(Math.max(target,18),'正在讀取核心內容','Core Parsing','Logo 與進度已先顯示；歡迎頁準備好後會立即放行。')}},900);
-  setTimeout(function(){if(!released){if(boot){boot.classList.add('soft-ready','welcome-fallback')}mark(Math.max(target,24),'歡迎頁已先顯示，背景載入中','5s Watchdog','已達 5 秒上限；畫面不再等待非必要資產，核心完成後會無縫接手。');if(document.getElementById('welcome'))release()}},5000);
+  setTimeout(function(){if(!released){boot&&boot.classList.add('soft-ready');mark(Math.max(target,18))}},900);
+  setTimeout(function(){if(!released){if(boot){boot.classList.add('soft-ready','welcome-fallback')}mark(Math.max(target,24));if(document.getElementById('welcome'))release()}},5000);
   document.addEventListener('pointerdown',function(e){var x=e.target&&e.target.closest?e.target.closest('.play,[data-act="say"],[data-act="zy"],.wl-speaker'):null;if(x)ensureAudio()},true);
   document.addEventListener('click',function(e){var x=e.target&&e.target.closest?e.target.closest('[data-act="dragon"],.ac-dragon,.dragon-intro'):null;if(x)ensureDragon()},true);
   var dragonObs=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes||[];for(var j=0;j<ns.length;j++){var n=ns[j];if(n.nodeType===1&&((n.matches&&n.matches('#ac-battle .ac-dragon,.dragon-intro .di-beast'))||(n.querySelector&&n.querySelector('#ac-battle .ac-dragon,.dragon-intro .di-beast')))){ensureDragon();dragonObs.disconnect();return}}}});
@@ -2646,9 +2668,9 @@ input,textarea,select{font-size:max(16px,1em)}
       var c=w.querySelector('.wl-count b'); if(c)c.textContent='100';
     }
   }
-  setTimeout(function(){if(window.XTW_BOOT){window.XTW_BOOT.mark(24,'歡迎頁已就緒，背景載入中','5s Watchdog');}else releaseBoot();},5000);
+  setTimeout(function(){if(window.XTW_BOOT){window.XTW_BOOT.mark(24);}else releaseBoot();},5000);
   setTimeout(releaseWelcomeLoader,1800);
-  window.addEventListener('pageshow',function(){setTimeout(function(){if(window.XTW_BOOT){window.XTW_BOOT.mark(24,'歡迎頁已就緒，背景載入中','5s Watchdog');}else releaseBoot();},5000);setTimeout(releaseWelcomeLoader,4200)});
+  window.addEventListener('pageshow',function(){setTimeout(function(){if(window.XTW_BOOT){window.XTW_BOOT.mark(24);}else releaseBoot();},5000);setTimeout(releaseWelcomeLoader,4200)});
 })();
 </script>
 
@@ -3358,55 +3380,60 @@ body.has-site-footer #app>.view{
 }
 </style>
 
-<script id="dragon-lockdown-victory-controller-v2">
+<script id="dragon-lockdown-victory-controller-v3">
 const DragonLockdown=(()=>{
-  let overlay=null,arenaPass=false,launchToken=0;
+  let overlay=null,arenaPass=false,launchToken=0,launching=false;
   const route=()=>{try{return window.TaiWanWayCurrentRoute?window.TaiWanWayCurrentRoute():null;}catch(_){return null;}};
   function status(){try{return window.TaiWanWayDragonStatus?window.TaiWanWayDragonStatus():null;}catch(_){return null;}}
   function remove(){if(overlay){overlay.remove();overlay=null;}}
-  function show(){if(overlay&&document.body.contains(overlay))return;remove();overlay=document.createElement('div');overlay.className='dragon-lockdown';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','dragon-lock-title');overlay.innerHTML=`<div class="dl-card"><span class="dl-kicker">FINAL BOSS EMERGENCY</span><h2 class="dl-title" id="dragon-lock-title">魔龍降臨</h2><p class="dl-line">淒淒慘慘戚戚</p><p class="dl-sub">條件已經達成。魔龍戰開始前，其他頁面暫時封鎖。<br><small>All other pages are locked until the Graduation Dragon challenge begins.</small></p><button type="button" class="btn-hero pri dl-enter"><span>傳送魔龍戰場</span><i class="orb">→</i></button></div>`;overlay.querySelector('.dl-enter').onclick=launch;document.body.appendChild(overlay);try{window.Soundscape&&window.Soundscape.sfx('boss',.18);}catch(_){}}
-  function waitAndStart(token,deadline){
-    if(token!==launchToken)return;
-    const st=status();
-    if(st&&st.won){arenaPass=false;remove();return;}
-    if(st&&st.battle){arenaPass=false;remove();return;}
-    const r=route(),onArena=!!(r&&r.v==='academy'&&r.id==='dragon');
-    const btn=onArena?document.querySelector('[data-ac="battle"][data-mode="real"]'):null;
-    if(btn){
-      btn.click();
-      requestAnimationFrame(()=>waitAndStart(token,deadline));
-      return;
-    }
-    if(performance.now()<deadline){requestAnimationFrame(()=>waitAndStart(token,deadline));return;}
-    arenaPass=false;
-    if(status()?.eligible)show();
+  function show(){
+    if(launching)return;
+    if(overlay&&document.body.contains(overlay))return;
+    remove();
+    overlay=document.createElement('div');
+    overlay.className='dragon-lockdown';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.setAttribute('aria-labelledby','dragon-lock-title');
+    overlay.innerHTML=`<div class="dl-card"><span class="dl-kicker">FINAL BOSS EMERGENCY</span><h2 class="dl-title" id="dragon-lock-title">魔龍降臨</h2><p class="dl-line">淒淒慘慘戚戚</p><p class="dl-sub">條件已經達成。按下後會直接進入正式魔龍戰。<br><small>One tap takes you straight into the playable Graduation Dragon battle.</small></p><button type="button" class="btn-hero pri dl-enter"><span>傳送魔龍戰場</span><i class="orb">→</i></button></div>`;
+    overlay.querySelector('.dl-enter').onclick=launch;
+    document.body.appendChild(overlay);
+    try{window.Soundscape&&window.Soundscape.sfx('boss',.18);}catch(_){}
   }
   function launch(){
+    if(launching)return;
     const token=++launchToken;
-    arenaPass=true;
-    remove();
-
-    // Hard-route to the dragon arena. The previous version relied only on go(),
-    // which could be swallowed by an in-flight View Transition / lockdown sync.
-    // Force the URL and render target first, then start the official battle.
-    try{
-      if(location.hash!=='#academy.dragon') history.pushState(null,'','#academy.dragon');
-      if(typeof render==='function') render({v:'academy',id:'dragon'},true);
-      else location.hash='#academy.dragon';
-    }catch(_){
-      location.hash='#academy.dragon';
-    }
-
-    const kick=()=>{
-      try{
-        const arena=document.getElementById('ac-arena');
-        if(arena) arena.scrollIntoView({behavior:'auto',block:'start'});
-      }catch(_){}
-      waitAndStart(token,performance.now()+6500);
-    };
-    requestAnimationFrame(()=>requestAnimationFrame(kick));
+    launching=true;arenaPass=true;
+    const btn=overlay&&overlay.querySelector('.dl-enter');
+    if(btn){btn.disabled=true;btn.setAttribute('aria-busy','true');const sp=btn.querySelector('span');if(sp)sp.textContent='進入戰場…';}
+    // Remove the fullscreen blocker before rendering the arena. The battle engine
+    // is invoked directly; no synthetic button click and no animation wait loop.
+    requestAnimationFrame(()=>{
+      remove();
+      let ok=false;
+      try{ok=!!(window.TaiWanWayEnterDragonBattle&&window.TaiWanWayEnterDragonBattle({skipIntro:true,source:'lockdown'}));}catch(_){}
+      if(ok){launching=false;arenaPass=false;return;}
+      // Very short compatibility retry in case the deferred app API finished on
+      // the same frame as this click. This never leaves a blocking overlay behind.
+      setTimeout(()=>{
+        if(token!==launchToken)return;
+        try{ok=!!(window.TaiWanWayEnterDragonBattle&&window.TaiWanWayEnterDragonBattle({skipIntro:true,source:'lockdown-retry'}));}catch(_){}
+        launching=false;arenaPass=false;
+        if(!ok){
+          try{location.hash='#academy.dragon';}catch(_){}
+          setTimeout(()=>{if(status()?.eligible&&!status()?.battle&&!status()?.won)show();},180);
+        }
+      },80);
+    });
   }
-  function sync(r=route()){const st=status();if(!st||!st.eligible||st.won){arenaPass=false;remove();return;}const onArena=r&&r.v==='academy'&&r.id==='dragon';if(onArena&&(arenaPass||st.battle)){remove();return;}show();}
+  function sync(r=route()){
+    const st=status();
+    if(!st||!st.eligible||st.won){arenaPass=false;launching=false;remove();return;}
+    if(launching)return;
+    const onArena=r&&r.v==='academy'&&r.id==='dragon';
+    if(onArena&&(arenaPass||st.battle)){remove();return;}
+    show();
+  }
   return {sync,launch,remove};
 })();
 window.DragonLockdown=DragonLockdown;
@@ -4137,5 +4164,190 @@ setTimeout(()=>DragonLockdown.sync(),0);
 @media(max-width:640px){.shop-view.night-market-view{padding-top:8px;padding-bottom:130px}.shop-mag-mast{margin-top:0;padding-bottom:14px}.shop-mag-rule{font-size:8px;letter-spacing:.12em}.shop-mag-rule span:last-child{display:none}.shop-mag-title-row{margin-top:18px}.shop-mag-title-row h1{font-size:clamp(48px,15vw,72px)}.shop-mag-title-row p{font-size:13px}.shop-mag-cover .market-scene-art{min-height:290px}.shop-mag-cover .market-scene-art img{max-height:310px}.shop-mag-cover .market-scene-copy{padding:20px 0}.shop-mag-cover .market-scene-copy h1{font-size:36px}.shop-mag-wallet.night-market-wallet{position:relative;top:auto;grid-template-columns:1fr 1fr;margin-bottom:20px}.shop-mag-wallet.night-market-wallet>span{min-height:58px;padding:9px 10px}.shop-mag-wallet.night-market-wallet .passive{grid-column:1/-1;border-right:0!important}.shop-mag-toolbar.night-market-toolbar{display:grid;gap:12px}.shop-mag-toolbar .night-market-filters{width:100%;gap:16px}.shop-mag-toolbar .night-market-inventory-btn{width:auto;justify-self:start}.shop-mag-grid.shop-grid{display:grid;grid-template-columns:1fr;border-left:0}.shop-editorial-card.shop-item,.shop-editorial-card.editorial-lead,.shop-editorial-card.premium{grid-column:auto;border-left:1px solid var(--mag-line)}.shop-editorial-media,.shop-editorial-card.editorial-lead .shop-editorial-media{min-height:270px;padding:28px}.shop-editorial-card .shop-item-art,.shop-editorial-card.editorial-lead .shop-item-art{width:min(72%,220px);height:min(72%,220px);min-width:140px;min-height:140px}.shop-editorial-content,.shop-editorial-card.editorial-lead .shop-editorial-content{padding:20px 18px 22px;gap:13px}.shop-editorial-card h3,.shop-editorial-card.editorial-lead h3{font-size:clamp(30px,10vw,42px)}.shop-editorial-card .shop-item-top{grid-template-columns:1fr}.shop-editorial-card .shop-price{justify-items:start;grid-auto-flow:column;justify-content:start;align-items:center}.shop-editorial-card .shop-price>small{margin-right:6px}.shop-editorial-card .shop-actions{grid-template-columns:1fr}.shop-editorial-card .shop-actions .btn{border-right:0!important;border-bottom:1px solid var(--mag-line)!important}.shop-editorial-card .shop-actions .btn:last-child{border-bottom:0!important}.shop-mag-note.shop-note{grid-template-columns:1fr;gap:10px}.shop-view .daily-gacha .gacha-head,.shop-view .daily-gacha .gacha-ritual,.shop-view .daily-gacha .gacha-links{padding-left:18px;padding-right:18px}.shop-view .shop-sheet-card{padding:22px 18px}.shop-view .shop-detail-art{height:220px}}
 @media(prefers-reduced-motion:reduce){.shop-editorial-card .shop-item-art,.shop-mag-toolbar .night-market-filter::after{transition:none!important}}
 </style>
+
+
+<style id="mobile-layout-repair-v117">
+/* =====================================================================
+   v1.17 · iOS / mobile layout repair
+   Fixes visualViewport sheet clipping, gacha art collision, footer tape
+   hard clipping, and the persistent Hub badge/dock alignment.
+   ===================================================================== */
+:root{--xtw-vvh:100dvh}
+
+/* 1) Hub sheet: header/tabs stay fixed, content itself owns the scroll. */
+@media(max-width:920px){
+  .xtw-friend-ov:has(.xtw-hub-panel){
+    box-sizing:border-box!important;
+    min-height:var(--xtw-vvh,100dvh)!important;
+    height:var(--xtw-vvh,100dvh)!important;
+    align-items:flex-end!important;
+    padding:
+      max(8px,env(safe-area-inset-top,0px))
+      7px
+      max(10px,env(safe-area-inset-bottom,0px))!important;
+    overflow:hidden!important;
+  }
+  .xtw-hub-panel{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    max-height:calc(var(--xtw-vvh,100dvh) - max(18px,env(safe-area-inset-top,0px)) - max(16px,env(safe-area-inset-bottom,0px)))!important;
+    height:auto!important;
+    margin:0!important;
+    overflow:hidden!important;
+    border-radius:26px 26px 20px 20px!important;
+  }
+  .xtw-hub-head,.xtw-hub-tabs{flex:0 0 auto!important}
+  .xtw-hub-body{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding-bottom:max(26px,calc(14px + env(safe-area-inset-bottom,0px)))!important;
+    scroll-padding-bottom:34px!important;
+  }
+  .xtw-hub-footer{padding-bottom:2px!important}
+  .xtw-hub-footer .btn{min-height:48px!important}
+}
+@media(max-width:430px){
+  .xtw-hub-head{padding:16px 14px 11px!important}
+  .xtw-hub-brand{gap:10px!important;padding-right:46px!important}
+  .xtw-hub-seal{width:43px!important;height:43px!important;font-size:24px!important}
+  .xtw-hub-title{font-size:25px!important}
+  .xtw-hub-summary{margin-top:13px!important;gap:6px!important}
+  .xtw-hub-person,.xtw-hub-stat{padding:9px 10px!important}
+  .xtw-hub-tabs{padding:8px 10px 0!important}
+  .xtw-hub-tab{min-height:42px!important}
+  .xtw-hub-body{padding:11px 11px max(24px,calc(12px + env(safe-area-inset-bottom,0px)))!important}
+  .xtw-hub-action{padding:12px 12px!important;border-radius:16px!important}
+}
+
+/* 2) Daily draw result: artwork owns a bounded row and can never cover copy. */
+.gacha-result-top{
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-auto-flow:row!important;
+  align-items:start!important;
+}
+.gacha-result-icon.has-art{
+  position:relative!important;
+  z-index:1!important;
+  overflow:hidden!important;
+  contain:layout paint!important;
+  flex:none!important;
+}
+.gacha-result-icon.has-art img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+}
+.gacha-result-top>h2,
+.gacha-result-top>.gacha-result-lede,
+.gacha-result-top>.gacha-result-extra{
+  position:relative!important;
+  z-index:3!important;
+}
+@media(max-width:720px){
+  .gacha-result-modal{
+    align-items:flex-start!important;
+    padding:max(16px,env(safe-area-inset-top,0px)) 12px max(20px,env(safe-area-inset-bottom,0px))!important;
+  }
+  .gacha-result-shell{margin:auto 0!important}
+  .gacha-result-card{gap:15px!important}
+  .gacha-result-top{gap:9px!important}
+  .gacha-result-icon.has-art{
+    width:116px!important;
+    height:116px!important;
+    margin:2px auto 8px!important;
+  }
+  .gacha-result-card h2{
+    margin:0!important;
+    max-width:100%!important;
+    font-size:clamp(27px,8.5vw,36px)!important;
+    line-height:1.14!important;
+    text-wrap:balance!important;
+  }
+  .gacha-result-lede{margin:0!important;max-width:34ch!important}
+}
+@media(max-width:390px){
+  .gacha-result-icon.has-art{width:104px!important;height:104px!important}
+  .gacha-result-card{padding-top:21px!important}
+}
+
+/* 3) Footer phrase tape: turn hard edge clipping into an intentional fade. */
+@media(max-width:620px){
+  .foot.foot2 .f-tape{
+    overflow:hidden!important;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)!important;
+    mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)!important;
+  }
+  .foot.foot2 .f-tape-track{
+    gap:32px!important;
+    padding-inline:24px!important;
+    font-size:16px!important;
+    line-height:1.1!important;
+  }
+}
+
+/* 4) Persistent Hub button: badge belongs to the button, not the page below. */
+@media(max-width:920px){
+  .xtw-friend-dock{
+    right:max(14px,env(safe-area-inset-right,0px))!important;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 94px)!important;
+  }
+  .xtw-friend-dock-btn{
+    box-sizing:border-box!important;
+    overflow:visible!important;
+    border:1px solid color-mix(in srgb,var(--accent-text) 24%,var(--glass-edge))!important;
+    box-shadow:0 12px 30px -14px rgba(20,35,27,.55),inset 0 1px 0 var(--glass-spec)!important;
+  }
+  .xtw-friend-dock-count{
+    right:-2px!important;
+    top:-5px!important;
+    min-width:21px!important;
+    height:21px!important;
+    padding:0 5px!important;
+    border:2.5px solid var(--bg)!important;
+    box-shadow:0 4px 12px rgba(100,30,25,.28)!important;
+    z-index:4!important;
+  }
+  .to-top{right:78px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 98px)!important}
+}
+@media(max-width:390px){
+  .xtw-friend-dock{right:max(12px,env(safe-area-inset-right,0px))!important;bottom:calc(env(safe-area-inset-bottom,0px) + 88px)!important}
+}
+</style>
+<script id="mobile-visual-viewport-fix-v117">
+(()=>{
+  'use strict';
+  const root=document.documentElement;
+  let raf=0;
+  const sync=()=>{
+    if(raf) cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>{
+      raf=0;
+      const vv=window.visualViewport;
+      const h=Math.max(320,Math.round(vv?vv.height:window.innerHeight));
+      root.style.setProperty('--xtw-vvh',h+'px');
+    });
+  };
+  sync();
+  addEventListener('resize',sync,{passive:true});
+  addEventListener('orientationchange',()=>setTimeout(sync,80),{passive:true});
+  addEventListener('pageshow',sync,{passive:true});
+  if(window.visualViewport){
+    visualViewport.addEventListener('resize',sync,{passive:true});
+    visualViewport.addEventListener('scroll',sync,{passive:true});
+  }
+})();
+</script>
+
 </body>
 </html>

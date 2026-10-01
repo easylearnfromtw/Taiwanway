@@ -1,17 +1,32 @@
-# 閒台文 GitHub Pages · 同窗QR v1.14
+# 閒台文 GitHub Pages 同窗QR v1.16
 
-## v1.14 夜市商城「時尚選物誌」版
+## v1.16 魔龍直達修正
+- 修正「傳送魔龍戰場」偶發卡住、只切頁卻沒有進入戰鬥的問題。
+- 傳送按鈕不再搜尋畫面上的「正式挑戰」按鈕後模擬 click，而是直接呼叫魔龍戰鬥引擎。
+- 單次點擊會直接切到 `#academy.dragon`、建立正式戰 battle state、跳過 2.6 秒魔龍降臨 intro，立即顯示第一題。
+- 移除 6.5 秒 requestAnimationFrame 等待迴圈；失敗時只做一次 80ms 相容性重試，且不會留下全螢幕遮罩阻塞頁面。
 
-- 商城重新設計為 editorial commerce／時尚雜誌式選物頁，不改動原本購買、持有、啟用與折扣計算邏輯。
-- 新增「夜市選物誌」masthead、VOL. 01、EDITOR'S SELECTION、商品編號與分類標記。
-- 時段市場主視覺改成雜誌封面式雙欄構圖；保留菜市場／黃昏市場／夜市／O和豆漿的時段切換。
-- 第一件商品改為本期主打跨欄版型；其餘商品以 editorial catalog 網格呈現。
-- 商品圖放大、增加留白；中文品名使用大標題，英文品名、價格、庫存、折扣降為編輯資訊層級。
-- 篩選器改成雜誌目錄式文字 tab；錢包改成精簡資產 ledger。
-- 數量、購買、詳情、啟用操作仍保留清楚觸控區，不為美觀犧牲操作性。
-- 「我的道具」與商品詳情 sheet 一併改為時尚型錄風格。
-- 今日一抽與商城活動卡同步收斂圓角、陰影與裝飾，維持同一 editorial 系統。
-- 手機版使用單欄 editorial feed，主視覺、商品圖與操作按鈕重新排版，避免桌機版硬縮造成擁擠。
-- 深色模式沿用現有 CSS variables，自動維持文字與分隔線對比。
+# 閒台文 GitHub Pages v1.15
 
-部署時請將整個資料夾內容覆蓋至 GitHub Pages repository。
+更新：啟動畫面改為台灣故事式載入里程碑。
+
+- 0% 唐山過台灣
+- 38% 與台灣原住民交朋友
+- 52% 阿美族的朋友說我皮膚很白
+- 73% 後來和客家人一起採茶
+- 100% 採茶成功！
+
+使用者介面不再顯示 5s Watchdog、Core Parsing、Audio Pack 等技術載入字樣；內部載入機制保持不變。
+
+
+## v1.17.1 packaging fix
+- GitHub Pages deploy files are at ZIP root (index.html / assets / soundscape).
+- Preserves v1.17 mobile layout fixes.
+- Startup/core scripts remain identical to v1.16; no old intro was reintroduced.
+
+## v1.18 · 夜市補給站 HUD 商城
+- 撤除 v1.14 的時尚雜誌商城版型。
+- 改為 GTA-inspired 遊戲 HUD 商店：左側分類、商品選取清單、大型預覽、資產錢包與明確購買／啟用流程。
+- 手機改為橫向分類列 + 單欄商品預覽，避開底部 safe-area。
+- 保留珍珠、貢丸、折扣、庫存、啟用、每日一抽、魔龍與永久道具邏輯。
+- 未使用 GTA logo、商標素材或遊戲截圖；只採用遊戲 HUD / 黑色補給站的介面語言。
