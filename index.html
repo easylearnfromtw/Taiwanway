@@ -3713,8 +3713,8 @@ setTimeout(()=>DragonLockdown.sync(),0);
 <!-- xtw-lazy-tail-v1: heavy media/deferred code placed after core for streamed first paint -->
 <script id="xtw-deferred-soundscape" type="text/plain" data-deferred="audio">(()=>{/* GitHub Pages build: ambience files live in ./soundscape/ */})();
 </script>
-<script id="xtw-deferred-audio-female" type="text/plain" data-deferred="audio">window.__AUD_twf={"F01_breakfast_greeting":"audio/twf/F01_breakfast_greeting.mp3","F02_breakfast_recommend":"audio/twf/F02_breakfast_recommend.mp3","F03_breakfast_here_to_go":"audio/twf/F03_breakfast_here_to_go.mp3","F04_breakfast_drink":"audio/twf/F04_breakfast_drink.mp3","F05_breakfast_total":"audio/twf/F05_breakfast_total.mp3","F06_shop_take_your_time":"audio/twf/F06_shop_take_your_time.mp3"};</script>
-<script id="xtw-deferred-audio-male" type="text/plain" data-deferred="audio">window.__AUD_twm={"M01_mrt_ask_station":"audio/twm/M01_mrt_ask_station.mp3","M02_mrt_thanks":"audio/twm/M02_mrt_thanks.mp3","M03_shop_price":"audio/twm/M03_shop_price.mp3","M04_shop_order":"audio/twm/M04_shop_order.mp3","M05_social_really":"audio/twm/M05_social_really.mp3","M06_social_easy":"audio/twm/M06_social_easy.mp3","M07_social_arriving":"audio/twm/M07_social_arriving.mp3","M08_social_contact":"audio/twm/M08_social_contact.mp3","M09_transit_bus":"audio/twm/M09_transit_bus.mp3","M10_transit_understood":"audio/twm/M10_transit_understood.mp3"};</script>
+<script id="xtw-deferred-audio-female" data-deferred="audio" data-ran="1">window.__AUD_twf={"F01_breakfast_greeting":"audio/twf/F01_breakfast_greeting.mp3","F02_breakfast_recommend":"audio/twf/F02_breakfast_recommend.mp3","F03_breakfast_here_to_go":"audio/twf/F03_breakfast_here_to_go.mp3","F04_breakfast_drink":"audio/twf/F04_breakfast_drink.mp3","F05_breakfast_total":"audio/twf/F05_breakfast_total.mp3","F06_shop_take_your_time":"audio/twf/F06_shop_take_your_time.mp3"};</script>
+<script id="xtw-deferred-audio-male" data-deferred="audio" data-ran="1">window.__AUD_twm={"M01_mrt_ask_station":"audio/twm/M01_mrt_ask_station.mp3","M02_mrt_thanks":"audio/twm/M02_mrt_thanks.mp3","M03_shop_price":"audio/twm/M03_shop_price.mp3","M04_shop_order":"audio/twm/M04_shop_order.mp3","M05_social_really":"audio/twm/M05_social_really.mp3","M06_social_easy":"audio/twm/M06_social_easy.mp3","M07_social_arriving":"audio/twm/M07_social_arriving.mp3","M08_social_contact":"audio/twm/M08_social_contact.mp3","M09_transit_bus":"audio/twm/M09_transit_bus.mp3","M10_transit_understood":"audio/twm/M10_transit_understood.mp3"};</script>
 <script id="xtw-asset-profile-female-mp4" type="text/plain"  data-lazy-asset="1">assets/profile-female.mp4</script>
 <script id="xtw-asset-profile-male-mp4" type="text/plain"  data-lazy-asset="1">assets/profile-male.mp4</script>
 <script id="xtw-asset-kaoliang" type="text/plain"  data-lazy-asset="1">assets/kaoliang.png</script>
@@ -5246,9 +5246,8 @@ img,video,canvas,svg{max-width:100%}
 </script>
 <!-- TAIWANWAY UNIFIED UX v1.21 END -->
 
-<!-- WELCOME REALLY AUDIO RESTORE v1 START -->
-<script id="aud-twm" type="application/json">{"M01_mrt_ask_station":"audio/twm/M01_mrt_ask_station.mp3","M02_mrt_thanks":"audio/twm/M02_mrt_thanks.mp3","M03_shop_price":"audio/twm/M03_shop_price.mp3","M04_shop_order":"audio/twm/M04_shop_order.mp3","M05_social_really":"audio/twm/M05_social_really.mp3","M06_social_easy":"audio/twm/M06_social_easy.mp3","M07_social_arriving":"audio/twm/M07_social_arriving.mp3","M08_social_contact":"audio/twm/M08_social_contact.mp3","M09_transit_bus":"audio/twm/M09_transit_bus.mp3","M10_transit_understood":"audio/twm/M10_transit_understood.mp3"}</script>
-<script id="welcome-really-audio-restore-v1">
+<!-- WELCOME REALLY AUDIO ALIAS v2 START -->
+<script id="welcome-really-audio-alias-v2">
 (()=>{
   'use strict';
   const DISPLAY='真的假的？';
@@ -5258,16 +5257,14 @@ img,video,canvas,svg{max-width:100%}
     if(!w)return;
     w.querySelectorAll('[data-act="say"][data-t="'+DISPLAY+'"]').forEach(btn=>{
       btn.dataset.t=RECORDED;
-      btn.dataset.welcomeAudioAlias='M05_social_really';
       btn.setAttribute('aria-label','播放「真的假的？」真人錄音');
     });
   };
   fix();
-  const mo=new MutationObserver(fix);
-  mo.observe(document.documentElement,{childList:true,subtree:true});
+  new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});
   addEventListener('pageshow',fix,{passive:true});
 })();
 </script>
-<!-- WELCOME REALLY AUDIO RESTORE v1 END -->
+<!-- WELCOME REALLY AUDIO ALIAS v2 END -->
 </body>
 </html>
