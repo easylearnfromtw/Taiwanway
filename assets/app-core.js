@@ -79533,8 +79533,14 @@ const AudioEng = {
     clearTimeout(this.ttsStartupTimer); this.ttsStartupTimer=0;
     clearTimeout(this.ttsChunkTimer); this.ttsChunkTimer=0;
     clearInterval(this.ttsKeepalive); this.ttsKeepalive=0;
+    const hadTTS=!!this.ttsSession || !!(window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending));
     this.ttsSession=null;
-    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (_) {} }
+    if (hadTTS && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+        this.lastSpeechCancelAt=performance.now();
+      } catch (_) {}
+    }
     if (this.src) { try { this.src.onended=null; this.src.stop(); } catch (_) {} this.src=null; }
     this.playback=null;
     if (this.native) {
@@ -79598,16 +79604,9 @@ function refreshSpeechVoice(){
 function primeSpeechEngine(fromGesture=false){
   const synth=window.speechSynthesis;if(!synth)return;
   refreshSpeechVoice();
-  if(!_speechPrimed && fromGesture){
+  if(fromGesture){
     _speechPrimed=true;
-    // A zero-width, near-silent utterance wakes the iOS/OS speech service without
-    // producing a meaningful audible phrase. Do not cancel it immediately: that can
-    // make WebKit's next utterance slower.
-    try{
-      const u=new SpeechSynthesisUtterance('\u200b');
-      if(_speechVoiceCache)u.voice=_speechVoiceCache;u.lang='zh-TW';u.rate=1.35;u.volume=.01;
-      synth.speak(u);
-    }catch(_){}
+    try{if(synth.paused)synth.resume();}catch(_){}
   }
 }
 try{ if(window.speechSynthesis) window.speechSynthesis.addEventListener?.('voiceschanged',refreshSpeechVoice); }catch(_){}
@@ -79638,113 +79637,113 @@ function speakFallback(text, rate, btn, vkey='', countListen=true) {
     if (window.Soundscape) window.Soundscape.duck(false);
     return false;
   }
+
   const synth=window.speechSynthesis;
   if (!synth || /^tai:/.test(vkey)) {
     if(btn){btn.classList.remove('playing','loading');btn.removeAttribute('aria-busy');}
     if(window.Soundscape)window.Soundscape.duck(false);
     return false;
   }
-  const voice=refreshSpeechVoice();
-  const token=AudioEng.token;
-  const chunks=splitSpeechChunks(text,12);
-  if(!chunks.length)return false;
-  AudioEng.btn=btn;
-  if(btn){btn.classList.add('playing');btn.classList.remove('loading');btn.removeAttribute('aria-busy');}
-  let index=0, current=null, startedAny=false, finished=false, chunkStarted=false, lastStartWall=0;
-  const retries=new Map();
-  const session={token,text,chunks,get index(){return index;},get current(){return current;},wake:null};
-  AudioEng.ttsSession=session;
 
-  const clearChunkTimers=()=>{
-    clearTimeout(AudioEng.ttsStartupTimer);AudioEng.ttsStartupTimer=0;
-    clearTimeout(AudioEng.ttsChunkTimer);AudioEng.ttsChunkTimer=0;
-  };
+  text=String(text||'').trim();
+  if(!text)return false;
+
+  const token=AudioEng.token;
+  let utterance=null, started=false, finished=false, retry=0, startTimer=0;
+  const session={token,text,wake:null,get current(){return utterance;}};
+  AudioEng.ttsSession=session;
+  AudioEng.btn=btn||null;
+
+  if(btn){
+    btn.classList.add('playing');
+    btn.classList.remove('loading');
+    btn.removeAttribute('aria-busy');
+  }
+  if(window.Soundscape)window.Soundscape.duck(true);
+
   const cleanup=()=>{
-    if(finished)return; finished=true; clearChunkTimers();
-    clearTimeout(AudioEng.watchdog);AudioEng.watchdog=0;
-    clearInterval(AudioEng.ttsKeepalive);AudioEng.ttsKeepalive=0;
+    if(finished)return;
+    finished=true;
+    clearTimeout(startTimer);
     if(AudioEng.ttsSession===session)AudioEng.ttsSession=null;
     if(btn){btn.classList.remove('playing','loading');btn.removeAttribute('aria-busy');}
     if(AudioEng.btn===btn)AudioEng.btn=null;
     if(window.Soundscape)window.Soundscape.duck(false);
   };
 
-  let launch;
-  const recover=(reason)=>{
-    if(finished||token!==AudioEng.token||index>=chunks.length)return cleanup();
-    const n=retries.get(index)||0;
-    if(n>=3)return cleanup();
-    retries.set(index,n+1);
-    clearChunkTimers();
-    const old=current; current=null; chunkStarted=false;
-    try{ if(old) { old.onstart=old.onend=old.onerror=null; } synth.cancel(); }catch(_){}
-    setTimeout(()=>{if(!finished&&token===AudioEng.token)launch(true);},140+n*130);
-  };
-
-  launch=(isRetry=false)=>{
-    if(finished||token!==AudioEng.token||index>=chunks.length){cleanup();return;}
-    clearChunkTimers();
-    try{synth.resume();}catch(_){}
-    const chunk=chunks[index];
-    const u=new SpeechSynthesisUtterance(chunk);
-    current=u; chunkStarted=false;
+  const launch=()=>{
+    if(finished||token!==AudioEng.token)return cleanup();
+    started=false;
+    const u=new SpeechSynthesisUtterance(text);
+    utterance=u;
+    const voice=refreshSpeechVoice();
     if(voice)u.voice=voice;
-    u.lang='zh-TW';u.rate=Math.max(.5,Math.min(1.5,rate));u.volume=.88;
+    u.lang='zh-TW';
+    u.rate=Math.max(.5,Math.min(1.5,rate));
+    u.pitch=1;
+    u.volume=1;
 
     u.onstart=()=>{
-      if(finished||token!==AudioEng.token||current!==u)return;
-      chunkStarted=true; lastStartWall=performance.now();
-      clearTimeout(AudioEng.ttsStartupTimer);AudioEng.ttsStartupTimer=0;
-      if(!startedAny){startedAny=true;if(countListen){markHeard(text);Daily.bump('listen');}if(window.Soundscape)window.Soundscape.duck(true);}
-      const chars=Math.max(1,[...chunk].length);
-      const limit=Math.max(6500,Math.min(15000,2600+(chars*620/Math.max(.55,rate))));
-      AudioEng.ttsChunkTimer=setTimeout(()=>{
-        if(!finished&&token===AudioEng.token&&current===u)recover('chunk-timeout');
-      },limit);
+      if(finished||token!==AudioEng.token||utterance!==u)return;
+      started=true;
+      clearTimeout(startTimer);
+      if(countListen){
+        markHeard(text);
+        Daily.bump('listen');
+        countListen=false;
+      }
     };
     u.onend=()=>{
-      if(finished||token!==AudioEng.token||current!==u)return;
-      clearChunkTimers(); current=null; chunkStarted=false; index++;
-      if(index>=chunks.length){cleanup();return;}
-      setTimeout(()=>{if(!finished&&token===AudioEng.token)launch(false);},45);
+      if(finished||token!==AudioEng.token||utterance!==u)return;
+      cleanup();
     };
     u.onerror=()=>{
-      if(finished||token!==AudioEng.token||current!==u)return;
-      recover('utterance-error');
+      if(finished||token!==AudioEng.token||utterance!==u)return;
+      clearTimeout(startTimer);
+      if(retry<1){
+        retry++;
+        try{
+          synth.cancel();
+          AudioEng.lastSpeechCancelAt=performance.now();
+        }catch(_){}
+        setTimeout(launch,180);
+      }else cleanup();
     };
-    try{synth.speak(u);}catch(_){recover('speak-throw');return;}
 
-    // Cold iOS speech services often need >340 ms. Give them a realistic window;
-    // retry only if the utterance truly never starts.
-    const startupWait=isRetry?3800:2600;
-    AudioEng.ttsStartupTimer=setTimeout(()=>{
-      if(finished||token!==AudioEng.token||current!==u||chunkStarted)return;
-      recover('startup-timeout');
-    },startupWait);
+    try{
+      if(synth.paused)synth.resume();
+      synth.speak(u);
+    }catch(_){
+      if(retry<1){retry++;setTimeout(launch,180);}
+      else cleanup();
+      return;
+    }
+
+    startTimer=setTimeout(()=>{
+      if(finished||token!==AudioEng.token||utterance!==u||started)return;
+      if(retry<1){
+        retry++;
+        try{
+          synth.cancel();
+          AudioEng.lastSpeechCancelAt=performance.now();
+        }catch(_){}
+        setTimeout(launch,180);
+      }else cleanup();
+    },2600);
   };
 
   session.wake=()=>{
     if(finished||token!==AudioEng.token)return;
-    try{synth.resume();}catch(_){}
-    // After an app/audio-route interruption WebKit may lose the active utterance
-    // without firing end/error. If so, retry only the current short chunk.
-    if(current && chunkStarted && !synth.speaking && performance.now()-lastStartWall>900) recover('wake-lost-utterance');
-    else if(!current && index<chunks.length) launch(true);
+    try{if(synth.paused)synth.resume();}catch(_){}
+    if(!started && !synth.speaking && !synth.pending){
+      clearTimeout(startTimer);
+      setTimeout(launch,80);
+    }
   };
 
-  clearInterval(AudioEng.ttsKeepalive);
-  AudioEng.ttsKeepalive=setInterval(()=>{
-    if(finished||token!==AudioEng.token)return;
-    try{if(synth.paused)synth.resume();}catch(_){}
-    if(current && chunkStarted && !document.hidden && !synth.speaking && performance.now()-lastStartWall>1400) recover('silent-stall');
-  },1800);
-
-  clearTimeout(AudioEng.watchdog);
-  AudioEng.watchdog=setTimeout(()=>{
-    if(token===AudioEng.token&&!finished)recover('session-watchdog');
-  },Math.max(45000,[...text].length*1800/Math.max(.55,rate)));
-
-  launch(false);
+  const elapsed=performance.now()-(AudioEng.lastSpeechCancelAt||0);
+  const delay=elapsed<180?Math.max(40,180-elapsed):0;
+  if(delay)setTimeout(launch,delay);else launch();
   return true;
 }
 function markHeard(text){const p=PH.find(x=>x.zh===text);if(p){S.heard[p.id]=1;save();}}
