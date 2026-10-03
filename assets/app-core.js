@@ -78698,7 +78698,26 @@ window.Soundscape = (() => {
   // only returns to full volume after the final foreground sound has finished.
   const duckLocks=new Set();
 
-  const mk = (src, loop=false) => { if(loop && window.LoopAudio && location.protocol!=='file:')return new window.LoopAudio.Track(P+src); const a=new Audio(P+src); a.preload=loop?'auto':'metadata'; a.loop=loop; a.playsInline=true; if(loop)a.autoplay=true; return a; };
+  const AUDIO_REV = '20261003-audiofix3';
+  function mediaURL(src){
+    try{
+      const u=new URL(P+src,document.baseURI);
+      u.searchParams.set('v',AUDIO_REV);
+      return u.href;
+    }catch(_){
+      return P+src+(String(P+src).includes('?')?'&':'?')+'v='+AUDIO_REV;
+    }
+  }
+  const mk = (src, loop=false, nativeLoop=false) => {
+    const url=mediaURL(src);
+    if(loop && !nativeLoop && window.LoopAudio && location.protocol!=='file:') return new window.LoopAudio.Track(url);
+    const a=new Audio(url);
+    a.preload=loop?'auto':'metadata';
+    a.loop=loop;
+    a.playsInline=true;
+    a.autoplay=false;
+    return a;
+  };
   const sceneVol = (key) => ({library:.075,clinic:.085,home:.075,office:.09,coast:.12,nightmarket:.13,stadium:.12,concert:.11,ktv:.10}[key] || .105);
   const musicVol = (key) => ({boss:.115, main:.115, night:.105, temple:.10, metro:.095, mountain:.10, midnight:.095}[key] || .10);
   const effectiveAmb = () => set.ambient && ambientRouteActive && !ducked ? .45*sceneVol(scene) : 0;
@@ -78878,7 +78897,7 @@ window.Soundscape = (() => {
   }
   function setMusic(key){
     key=MUSIC[key]?key:'main'; if(key===musicKey && music) return;
-    musicKey=key; const old=music; music=mk(MUSIC[key],true); music.volume=0;
+    musicKey=key; const old=music; music=mk(MUSIC[key],true,true); music.volume=0;
     /* Do not consume the first playback attempt before a real user gesture.
        unlock() will start it synchronously on the first tap/click/key. */
     if(unlocked) safePlay(music);
