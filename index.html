@@ -4646,14 +4646,8 @@ html.xtw-friend-lock,html.xtw-friend-lock body{
   const root=document.documentElement;
   const body=()=>document.body;
 
-  /* Every “同窗冊” entry now lands on the direct friend list in the integrated hub. */
-  document.addEventListener('click',e=>{
-    const b=e.target.closest && e.target.closest('[data-xf-act="book"]');
-    if(!b || !window.XTWFriends || typeof XTWFriends.openHub!=='function') return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    XTWFriends.openHub('friends');
-  },true);
+  /* The v1.21 handler below is the single owner of 同窗冊 routing.
+     Avoid capturing/stopping the same click twice. */
 
   /* Flatten the profile identity card and stop background video decoding. */
   let flatRAF=0;
@@ -4690,7 +4684,11 @@ html.xtw-friend-lock,html.xtw-friend-lock body{
 
   /* Label the primary destination honestly: it is the friend book, not another menu. */
   const relabel=()=>{
-    document.querySelectorAll('.xtw-hub-tab[data-hub-tab="friends"] span').forEach(el=>el.textContent='同窗冊');
+    document.querySelectorAll('.xtw-hub-tab[data-hub-tab="friends"] span').forEach(el=>{
+      // Assigning an unchanged textContent still queues childList mutations.
+      // Without this guard the global observer retriggers itself continuously.
+      if(el.textContent!=='同窗冊') el.textContent='同窗冊';
+    });
   };
   new MutationObserver(relabel).observe(document.body,{childList:true,subtree:true});
   relabel();
@@ -5185,9 +5183,9 @@ img,video,canvas,svg{max-width:100%}
   /* Profile identity stays flat/static. Video cards use their poster on mobile. */
   function flattenProfile(){
     document.querySelectorAll('.profile-id-card .pid-media,.profile-id-card .pid-tilt-shell').forEach(function(el){
-      el.removeAttribute('data-tilt-card');
-      el.classList.remove('tilting');
-      el.style.transform='none';
+      if(el.hasAttribute('data-tilt-card')) el.removeAttribute('data-tilt-card');
+      if(el.classList.contains('tilting')) el.classList.remove('tilting');
+      if(el.style.transform!=='none') el.style.transform='none';
       el.style.removeProperty('--mx');el.style.removeProperty('--my');
       el.style.removeProperty('--sx');el.style.removeProperty('--sy');
       el.style.removeProperty('--gx');el.style.removeProperty('--gy');
